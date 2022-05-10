@@ -3,4 +3,4 @@ project(ClusterChat)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(ClusterChat main.cpp)
+add_executable(ClusterChat src/main.cpp)
