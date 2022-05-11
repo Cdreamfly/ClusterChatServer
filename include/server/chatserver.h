@@ -4,8 +4,7 @@
 
 #ifndef CLUSTERCHAT_CHATSERVER_H
 #define CLUSTERCHAT_CHATSERVER_H
-#include <iostream>
-#include <string>
+
 #include <functional>
 #include "muduo/net/TcpServer.h"
 #include "muduo/net/EventLoop.h"

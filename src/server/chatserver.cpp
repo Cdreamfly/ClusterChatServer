@@ -3,6 +3,8 @@
 //
 
 #include "server/chatserver.h"
+#include "server/chatservice.h"
+#include <iostream>
 
 ChatServer::ChatServer(muduo::net::EventLoop *loop, const muduo::net::InetAddress &addr, const std::string &msg)
         :server_(loop,addr,msg),loop_(loop)
@@ -21,9 +23,16 @@ ChatServer::~ChatServer() {}
 
 void ChatServer::onMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net::Buffer *buf,muduo::Timestamp timestamp)
 {
-
+    std::string str = buf->retrieveAllAsString();
+    std::cout<<str<<std::endl;
+    json js = json::parse(str);
+    auto msgHandler = ChatService::Instance().GetHandler(js["msgid"].get<int>());
+    msgHandler(conn,js,timestamp);
 }
 void ChatServer::onConnection(const muduo::net::TcpConnectionPtr &conn)
 {
-
+    if(!conn->connected())
+    {
+        conn->shutdown();
+    }
 }
