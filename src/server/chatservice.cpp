@@ -16,7 +16,26 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
 }
 void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
-    LOG_INFO<<"Do Login Service!";
+    //获取客户端的注册信息创建对象
+   User user(-1,js["name"],js["pwd"]);
+   if(userModel_.Insert(user))
+   {
+       //插入新用户成功
+       json res;
+       res["msg-id"] = REG_MSG_ACK;
+       res["errno"] = 0;
+       res["id"] = user.getId();
+       conn->send(res.dump());
+   }
+   else
+   {
+       //插入新用户失败
+       json res;
+       res["msg-id"] = REG_MSG_ACK;
+       res["errno"] = 1;
+       res["id"] = user.getId();
+       conn->send(res.dump());
+   }
 }
 /*
  * 获取消息id对应的处理函数
