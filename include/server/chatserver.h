@@ -9,6 +9,9 @@
 #include "muduo/net/TcpServer.h"
 #include "muduo/net/EventLoop.h"
 
+/**
+ * 网路模块
+ */
 class ChatServer
 {
 public:
@@ -16,7 +19,9 @@ public:
     void Start();
     ~ChatServer();
 private:
+    //上报链接相关回调函数
     void onConnection(const muduo::net::TcpConnectionPtr &conn);
+    //上报读写相关回调函数
     void onMessage(const muduo::net::TcpConnectionPtr&conn,muduo::net::Buffer*buf,muduo::Timestamp timestamp);
 private:
     muduo::net::TcpServer server_;
