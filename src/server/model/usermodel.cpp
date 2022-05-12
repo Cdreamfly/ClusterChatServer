@@ -1,0 +1,60 @@
+//
+// Created by Cmf on 2022/5/12.
+
+
+//
+
+#include "server/model/usermodel.h"
+#include "server/db/db.h"
+#include <iostream>
+#include <sstream>
+
+bool UserModel::Insert(User &user)
+{
+    std::ostringstream sql;
+    sql<<"insert into user(name,password,state) values("<<"'"<<user.getName()<<"','"<<user.getPwd()<<"','"<<user.getState()<<"')";
+    std::string temp = sql.str();
+    std::cout<<"install sql :"<<temp <<std::endl;
+    MySQL mySql;
+    if(mySql.Connect())
+    {
+        if(mySql.Update(temp))
+        {
+            //获取插入成功生成的主键
+            user.setId(mysql_insert_id(mySql.GetConnect()));
+            return true;
+        }
+    }
+    return false;
+}
+
+User UserModel::Query(int id)
+{
+    std::ostringstream sql;
+    sql<<"select * from user where id = "<<id;
+    std::string temp = sql.str();
+    std::cout<<"query sql:"<<temp<<std::endl;
+    MySQL mySql;
+    if(mySql.Connect())
+    {
+        MYSQL_RES* res = mySql.Query(temp);
+        if(res != nullptr)
+        {
+            MYSQL_ROW row = mysql_fetch_row(res);
+            User user(atoi(row[0]),row[1],row[2],row[3]);
+            mysql_free_result(res);
+            return user;
+        }
+    }
+    return User();
+}
+
+bool UserModel::UpdateState(User &user)
+{
+    return false;
+}
+
+bool UserModel::ReState()
+{
+    return false;
+}

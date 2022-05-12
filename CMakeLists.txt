@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 project(ClusterChat)
 set(CMAKE_CXX_STANDARD 14)
+
 file(GLOB SRC_FILES
         "${PROJECT_SOURCE_DIR}/src/server/*.h"
         "${PROJECT_SOURCE_DIR}/src/server/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/server/db/*.h"
-        "${PROJECT_SOURCE_DIR}/src/server/db/*.cpp")
+        "${PROJECT_SOURCE_DIR}/src/server/db/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/server/model/*.h"
+        "${PROJECT_SOURCE_DIR}/src/server/model/*.cpp")
 
 link_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/libs

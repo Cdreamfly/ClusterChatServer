@@ -10,6 +10,8 @@
 #include "muduo/net/TcpConnection.h"
 #include "json.hpp"
 #include "public.h"
+#include "model/usermodel.h"
+#include "server/model/usermodel.h"
 
 using json = nlohmann::json;
 using MsgHandler = std::function<void(const muduo::net::TcpConnectionPtr&,json&, muduo::Timestamp)>;
@@ -33,6 +35,7 @@ private:
     ChatService();//单例
 private:
     std::unordered_map<int,MsgHandler> msgHandlerMap_;  //一个消息id对应一个处理函数
+    UserModel userModel_;
 };
 
 #endif //CLUSTERCHAT_CHATSERVICE_H
