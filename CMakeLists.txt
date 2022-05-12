@@ -3,7 +3,9 @@ project(ClusterChat)
 set(CMAKE_CXX_STANDARD 14)
 file(GLOB SRC_FILES
         "${PROJECT_SOURCE_DIR}/src/server/*.h"
-        "${PROJECT_SOURCE_DIR}/src/server/*.cpp")
+        "${PROJECT_SOURCE_DIR}/src/server/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/server/db/*.h"
+        "${PROJECT_SOURCE_DIR}/src/server/db/*.cpp")
 
 link_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/libs
@@ -19,4 +21,5 @@ target_link_libraries(ClusterChat
         libmuduo_http.a
         libmuduo_inspect.a
         libmuduo_base.a
+        mysqlclient
         pthread)

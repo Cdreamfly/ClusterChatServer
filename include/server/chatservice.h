@@ -14,6 +14,9 @@
 using json = nlohmann::json;
 using MsgHandler = std::function<void(const muduo::net::TcpConnectionPtr&,json&, muduo::Timestamp)>;
 
+/*
+ * 业务模块
+ */
 class ChatService
 {
 public:
