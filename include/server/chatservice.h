@@ -13,6 +13,7 @@
 #include "public.h"
 #include "model/usermodel.h"
 #include "server/model/usermodel.h"
+#include "server/model/offlinemessagemodel.h"
 
 using json = nlohmann::json;
 using MsgHandler = std::function<void(const muduo::net::TcpConnectionPtr&,json&, muduo::Timestamp)>;
@@ -45,6 +46,8 @@ private:
     std::unordered_map<int,muduo::net::TcpConnectionPtr> userConnMap_;  //存储在线用户连接信息
     std::mutex mtx_;
     UserModel userModel_;
+    OfflineMsgModel offlineMsgModel_;
+
 };
 
 #endif //CLUSTERCHAT_CHATSERVICE_H

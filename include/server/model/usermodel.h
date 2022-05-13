@@ -6,10 +6,12 @@
 #define CLUSTERCHAT_USERMODEL_H
 
 #include "user.h"
+#include "server/db/db.h"
 
 class UserModel
 {
 public:
+    UserModel();
     //添加用户
     bool Insert(User&user);
     //查询用户
@@ -18,6 +20,9 @@ public:
     bool UpdateState(User&user);
     //重置用户状态
     bool ReState();
+
+private:
+    MySQL mySql_;
 };
 
 

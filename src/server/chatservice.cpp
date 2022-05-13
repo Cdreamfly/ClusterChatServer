@@ -9,7 +9,9 @@ ChatService &ChatService::Instance()
     static ChatService service;
     return service;
 }
-
+/*
+ * 登录
+ */
 void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
     int id = js["id"].get<int>();
@@ -43,6 +45,13 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
             res["errno"] = 0;
             res["id"] = user.getId();
             res["name"] = user.getName();
+            //查询是否有离线消息
+            std::vector<std::string>vec = offlineMsgModel_.Query(id);
+            if(!vec.empty())
+            {
+                res["offlinemsg"] = vec;
+                offlineMsgModel_.Remove(id);
+            }
             conn->send(res.dump());
         }
     }
@@ -56,41 +65,49 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
         conn->send(res.dump());
     }
 }
+/*
+ * 注册
+ */
 void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
     //获取客户端的注册信息创建对象
-   User user(-1,js["name"],js["pwd"]);
-   if(userModel_.Insert(user))
-   {
-       //插入新用户成功
-       json res;
-       res["msg-id"] = REG_MSG_ACK;
-       res["errno"] = 0;
-       res["id"] = user.getId();
-       conn->send(res.dump());
-   }
-   else
-   {
-       //插入新用户失败
-       json res;
-       res["msg-id"] = REG_MSG_ACK;
-       res["errno"] = 1;
-       res["id"] = user.getId();
-       conn->send(res.dump());
-   }
+    User user(-1,js["name"],js["pwd"]);
+    if(userModel_.Insert(user))
+    {
+        //插入新用户成功
+        json res;
+        res["msg-id"] = REG_MSG_ACK;
+        res["errno"] = 0;
+        res["id"] = user.getId();
+        conn->send(res.dump());
+    }
+    else
+    {
+        //插入新用户失败
+        json res;
+        res["msg-id"] = REG_MSG_ACK;
+        res["errno"] = 1;
+        res["id"] = user.getId();
+        conn->send(res.dump());
+    }
 }
+/*
+ * 私聊
+ */
 void ChatService::oneChat(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
-    int id = js["to-id"].get<int>();
+    int toid = js["to-id"].get<int>();
     {
         std::lock_guard<std::mutex> lk(mtx_);
-        auto it = userConnMap_.find(id);
+        auto it = userConnMap_.find(toid);
         if(it != userConnMap_.end())
         {
             //如果在线就发送消息
             it->second->send(js.dump());
         }
     }
+    //不在线就存储离线消息
+    offlineMsgModel_.Install(toid,js.dump());
 }
 /*
  * 获取消息id对应的处理函数
@@ -127,7 +144,9 @@ ChatService::~ChatService()
 {
 
 }
-
+/*
+ * 找到异常退出的链接删了它并设置为离线状态
+ */
 void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
 {
     User user;
@@ -144,7 +163,6 @@ void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
             }
         }
     }
-
     if(user.getId() != -1)
     {
         userModel_.UpdateState(user);
