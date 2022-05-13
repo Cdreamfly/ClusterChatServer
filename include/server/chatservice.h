@@ -29,6 +29,8 @@ public:
     void Login(const muduo::net::TcpConnectionPtr&conn,json&js, muduo::Timestamp timestamp);
     //处理注册
     void Reg(const muduo::net::TcpConnectionPtr&conn,json&js, muduo::Timestamp timestamp);
+    //一对一聊天
+    void oneChat(const muduo::net::TcpConnectionPtr&conn,json&js, muduo::Timestamp timestamp);
     //获取消息id对应的处理函数
     MsgHandler GetHandler(int msgId);
     //处理客户端异常推出

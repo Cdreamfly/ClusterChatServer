@@ -79,6 +79,19 @@ void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo:
        conn->send(res.dump());
    }
 }
+void ChatService::oneChat(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+{
+    int id = js["to-id"].get<int>();
+    {
+        std::lock_guard<std::mutex> lk(mtx_);
+        auto it = userConnMap_.find(id);
+        if(it != userConnMap_.end())
+        {
+            //如果在线就发送消息
+            it->second->send(js.dump());
+        }
+    }
+}
 /*
  * 获取消息id对应的处理函数
  */
@@ -107,7 +120,7 @@ ChatService::ChatService()
     //用户基本业务管理相关事件处理回调注册
     msgHandlerMap_.insert({LOGIN_MSG,std::bind(&ChatService::Login,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
     msgHandlerMap_.insert({REG_MSG,std::bind(&ChatService::Reg,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
-
+    msgHandlerMap_.insert({ONE_CHAT_MSG,std::bind(&ChatService::oneChat,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
 }
 
 ChatService::~ChatService()
