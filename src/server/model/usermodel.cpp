@@ -51,10 +51,32 @@ User UserModel::Query(int id)
 
 bool UserModel::UpdateState(User &user)
 {
+    std::ostringstream sql;
+    sql<<"update user set state = "<<"'"<<user.getState()<<"' where id = "<<user.getId();
+    std::string temp = sql.str();
+    std::cout<<"updateState sql:"<<temp<<std::endl;
+    MySQL mySql;
+    if(mySql.Connect())
+    {
+        if(mySql.Update(temp))
+        {
+            return true;
+        }
+    }
     return false;
 }
 
 bool UserModel::ReState()
 {
+    std::string sql = "update user set state = 'offline' where state = 'online'";
+    std::cout<<"ReState sql:"<<sql<<std::endl;
+    MySQL mySql;
+    if(mySql.Connect())
+    {
+        if(mySql.Update(sql))
+        {
+            return true;
+        }
+    }
     return false;
 }

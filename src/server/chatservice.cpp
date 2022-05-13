@@ -12,7 +12,43 @@ ChatService &ChatService::Instance()
 
 void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
-    LOG_INFO<<"Do Login Service!";
+    int id = js["id"].get<int>();
+    std::string pwd = js["pwd"];
+    User user = userModel_.Query(id);
+    //如果id和密码正确
+    if(user.getId() == id && user.getPwd() == pwd)
+    {
+        //如果已经是登录状态
+        if(user.getState() == "online")
+        {
+            json res;
+            res["msg-id"] = LOGIN_MSG_ACK;
+            res["errno"] = 2;
+            res["errmsg"] = "this account is using, input another!";
+            conn->send(res.dump());
+        }
+        else
+        {
+            //不是则登录
+            user.setState("online");
+            userModel_.UpdateState(user);
+            json res;
+            res["msg-id"] = LOGIN_MSG_ACK;
+            res["errno"] = 0;
+            res["id"] = user.getId();
+            res["name"] = user.getName();
+            conn->send(res.dump());
+        }
+    }
+    else
+    {
+        //不正确或找不到的返回
+        json res;
+        res["msg-id"] = LOGIN_MSG_ACK;
+        res["errno"] = 1;
+        res["errmsg"] = "id or password is invalid!";
+        conn->send(res.dump());
+    }
 }
 void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
