@@ -30,6 +30,12 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
         else
         {
             //不是则登录
+            {
+                //记录用户连接信息，要考虑线程安全，因为多线程访问
+                std::lock_guard<std::mutex> lk(mtx_);
+                userConnMap_.insert({id,conn});
+            }
+            //更新用户状态信息 state offline => online
             user.setState("online");
             userModel_.UpdateState(user);
             json res;

@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 #include <functional>
+#include <mutex>
 #include "muduo/net/TcpConnection.h"
 #include "json.hpp"
 #include "public.h"
@@ -31,10 +32,14 @@ public:
     //获取消息id对应的处理函数
     MsgHandler GetHandler(int msgId);
     ~ChatService();
+
 private:
     ChatService();//单例
+
 private:
     std::unordered_map<int,MsgHandler> msgHandlerMap_;  //一个消息id对应一个处理函数
+    std::unordered_map<int,muduo::net::TcpConnectionPtr> userConnMap_;  //存储在线用户连接信息
+    std::mutex mtx_;
     UserModel userModel_;
 };
 
