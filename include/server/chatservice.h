@@ -36,6 +36,8 @@ public:
     MsgHandler GetHandler(int msgId);
     //处理客户端异常推出
     void clientCloseException(const muduo::net::TcpConnectionPtr& conn);
+    //服务器异常处理
+    void Reset();
     ~ChatService();
 
 private:

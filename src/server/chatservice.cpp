@@ -168,3 +168,10 @@ void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
         userModel_.UpdateState(user);
     }
 }
+/*
+ * //把online状态的用户，设置成offline
+ */
+void ChatService::Reset()
+{
+    userModel_.ReState();
+}
