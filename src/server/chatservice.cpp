@@ -114,3 +114,26 @@ ChatService::~ChatService()
 {
 
 }
+
+void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
+{
+    User user;
+    {
+        std::lock_guard<std::mutex>lk(mtx_);
+        for(auto it = userConnMap_.begin();it!=userConnMap_.end();++it)
+        {
+            if(it->second == conn)
+            {
+                user.setId(it->first);
+                user.setState("offline");
+                userConnMap_.erase(it);
+                break;
+            }
+        }
+    }
+
+    if(user.getId() != -1)
+    {
+        userModel_.UpdateState(user);
+    }
+}
