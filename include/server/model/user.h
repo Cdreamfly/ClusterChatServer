@@ -26,10 +26,10 @@ public:
 
 
 private:
-    int id_;
-    std::string name_;
-    std::string pwd_;
-    std::string state_;
+    int _id;
+    std::string _name;
+    std::string _pwd;
+    std::string _state;
 };
 
 #endif //CLUSTERCHAT_USER_H

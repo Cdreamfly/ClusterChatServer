@@ -22,7 +22,7 @@ public:
     bool ReState();
 
 private:
-    MySQL mySql_;
+    MySQL _mySql;
 };
 
 

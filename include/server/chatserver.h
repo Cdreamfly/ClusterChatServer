@@ -24,7 +24,7 @@ private:
     //上报读写相关回调函数
     void onMessage(const muduo::net::TcpConnectionPtr&conn,muduo::net::Buffer*buf,muduo::Timestamp timestamp);
 private:
-    muduo::net::TcpServer server_;
-    muduo::net::EventLoop* loop_;
+    muduo::net::TcpServer _server;
+    muduo::net::EventLoop* _loop;
 };
 #endif //CLUSTERCHAT_CHATSERVER_H

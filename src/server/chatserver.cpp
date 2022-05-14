@@ -7,21 +7,21 @@
 #include <iostream>
 
 ChatServer::ChatServer(muduo::net::EventLoop *loop, const muduo::net::InetAddress &addr, const std::string &msg)
-        :server_(loop,addr,msg),loop_(loop)
+        : _server(loop, addr, msg), _loop(loop)
 {
     //和注册链接回调
-    server_.setConnectionCallback(std::bind(&ChatServer::onConnection,this,std::placeholders::_1));
+    _server.setConnectionCallback(std::bind(&ChatServer::onConnection, this, std::placeholders::_1));
     //注册消息回调
-    server_.setMessageCallback(std::bind(&ChatServer::onMessage,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3));
+    _server.setMessageCallback(std::bind(&ChatServer::onMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     //设置线程数量
-    server_.setThreadNum(4);
+    _server.setThreadNum(4);
 }
 /*
  * 启动服务
  */
 void ChatServer::Start()
 {
-    server_.start();
+    _server.start();
 }
 
 ChatServer::~ChatServer() {}
@@ -36,7 +36,7 @@ void ChatServer::onMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net:
     //反序列化
     json js = json::parse(str);
     //通过json获取业务处理模块事先绑定的业务处理函数
-    auto msgHandler = ChatService::Instance().GetHandler(js["msg-id"].get<int>());
+    auto msgHandler = ChatService::Instance().GetHandler(js["msgid"].get<int>());
     //执行这个业务
     msgHandler(conn,js,timestamp);
 }

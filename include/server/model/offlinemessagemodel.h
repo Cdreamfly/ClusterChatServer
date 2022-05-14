@@ -21,7 +21,7 @@ public:
     //查询离线消息
     std::vector<std::string> Query(int id);
 private:
-    MySQL mySql_;
+    MySQL _mySql;
 };
 
 #endif //CLUSTERCHAT_OFFLINEMESSAGEMODEL_H

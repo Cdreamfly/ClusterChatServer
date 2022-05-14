@@ -71,11 +71,14 @@ json["id"]			//要注销的id
 ### 测试json
 ```
 登录
-{"msg-id":1,"id":2,"pwd":"123456"}
+{"msgid":1,"id":2,"pwd":"123456"}
 
 注册
-{"msg-id":4,"id":2,"pwd":"123456"}
+{"msgid":4,"id":2,"pwd":"123456"}
 
 发消息
-{"msg-id":6,"id":1,"from":"cmf","to-id":2,"msg":" xxxxxxoooooo!"} 
+{"msgid":6,"id":1,"from":"cmf","toid":2,"msg":" xxxxxxoooooo!"} 
+
+加好友
+{"msgid":7,"id":2,"friendid":1}
 ```

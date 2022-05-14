@@ -4,48 +4,48 @@
 
 #include "server/model/user.h"
 
-User::User():id_(-1),name_(""),pwd_(""),state_("offline") {}
+User::User(): _id(-1), _name(""), _pwd(""), _state("offline") {}
 
-User::User(int id, std::string name, std::string pwd, std::string state):id_(id),name_(name),pwd_(pwd),state_(state){}
+User::User(int id, std::string name, std::string pwd, std::string state): _id(id), _name(name), _pwd(pwd), _state(state){}
 
 User::~User() {}
 
 void User::setId(int id)
 {
-    id_ = id;
+    _id = id;
 }
 
 void User::setName(std::string name)
 {
-    name_ = name;
+    _name = name;
 }
 
 void User::setPwd(std::string pwd)
 {
-    pwd_ = pwd;
+    _pwd = pwd;
 }
 
 void User::setState(std::string state)
 {
-    state_ = state;
+    _state = state;
 }
 
 int User::getId() const
 {
-    return id_;
+    return _id;
 }
 
 std::string User::getName() const
 {
-    return name_;
+    return _name;
 }
 
 std::string User::getPwd() const
 {
-    return pwd_;
+    return _pwd;
 }
 
 std::string User::getState() const
 {
-    return state_;
+    return _state;
 }

@@ -10,13 +10,25 @@ ChatService &ChatService::Instance()
     return service;
 }
 /*
+ * 注册消息及对应的业务处理
+ */
+ChatService::ChatService()
+{
+    //用户基本业务管理相关事件处理回调注册
+    _msgHandlerMap.insert({LOGIN_MSG, std::bind(&ChatService::Login, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::Reg, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+
+}
+/*
  * 登录
  */
 void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
     int id = js["id"].get<int>();
     std::string pwd = js["pwd"];
-    User user = userModel_.Query(id);
+    User user = _userModel.Query(id);
     //如果id和密码正确
     if(user.getId() == id && user.getPwd() == pwd)
     {
@@ -24,7 +36,7 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
         if(user.getState() == "online")
         {
             json res;
-            res["msg-id"] = LOGIN_MSG_ACK;
+            res["msgid"] = LOGIN_MSG_ACK;
             res["errno"] = 2;
             res["errmsg"] = "this account is using, input another!";
             conn->send(res.dump());
@@ -34,23 +46,38 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
             //不是则登录
             {
                 //记录用户连接信息，要考虑线程安全，因为多线程访问
-                std::lock_guard<std::mutex> lk(mtx_);
-                userConnMap_.insert({id,conn});
+                std::lock_guard<std::mutex> lk(_mtx);
+                _userConnMap.insert({id, conn});
             }
             //更新用户状态信息 state offline => online
             user.setState("online");
-            userModel_.UpdateState(user);
+            _userModel.UpdateState(user);
             json res;
             res["msg-id"] = LOGIN_MSG_ACK;
             res["errno"] = 0;
             res["id"] = user.getId();
             res["name"] = user.getName();
             //查询是否有离线消息
-            std::vector<std::string>vec = offlineMsgModel_.Query(id);
+            std::vector<std::string>vec = _offlineMsgModel.Query(id);
             if(!vec.empty())
             {
                 res["offlinemsg"] = vec;
-                offlineMsgModel_.Remove(id);
+                _offlineMsgModel.Remove(id);
+            }
+            //查询是否有好友
+            std::vector<User>userVec = _friendModel.Query(id);
+            if(!userVec.empty())
+            {
+                std::vector<std::string>friendVec;
+                for(auto& it:userVec)
+                {
+                    json js;
+                    js["id"] = it.getId();
+                    js["name"] = it.getName();
+                    js["state"] = it.getState();
+                    friendVec.emplace_back(js.dump());
+                }
+                res["friends"] = friendVec;
             }
             conn->send(res.dump());
         }
@@ -59,7 +86,7 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
     {
         //不正确或找不到的返回
         json res;
-        res["msg-id"] = LOGIN_MSG_ACK;
+        res["msgid"] = LOGIN_MSG_ACK;
         res["errno"] = 1;
         res["errmsg"] = "id or password is invalid!";
         conn->send(res.dump());
@@ -72,11 +99,11 @@ void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo:
 {
     //获取客户端的注册信息创建对象
     User user(-1,js["name"],js["pwd"]);
-    if(userModel_.Insert(user))
+    if(_userModel.Insert(user))
     {
         //插入新用户成功
         json res;
-        res["msg-id"] = REG_MSG_ACK;
+        res["msgid"] = REG_MSG_ACK;
         res["errno"] = 0;
         res["id"] = user.getId();
         conn->send(res.dump());
@@ -85,7 +112,7 @@ void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo:
     {
         //插入新用户失败
         json res;
-        res["msg-id"] = REG_MSG_ACK;
+        res["msgid"] = REG_MSG_ACK;
         res["errno"] = 1;
         res["id"] = user.getId();
         conn->send(res.dump());
@@ -96,29 +123,38 @@ void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo:
  */
 void ChatService::oneChat(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
-    int toid = js["to-id"].get<int>();
+    int toid = js["toid"].get<int>();
     {
-        std::lock_guard<std::mutex> lk(mtx_);
-        auto it = userConnMap_.find(toid);
-        if(it != userConnMap_.end())
+        std::lock_guard<std::mutex> lk(_mtx);
+        auto it = _userConnMap.find(toid);
+        if(it != _userConnMap.end())
         {
             //如果在线就发送消息
             it->second->send(js.dump());
         }
     }
     //不在线就存储离线消息
-    offlineMsgModel_.Install(toid,js.dump());
+    _offlineMsgModel.Install(toid, js.dump());
+}
+/*
+ * 添加好友
+ */
+void ChatService::addFriend(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+{
+    int userId = js["id"].get<int>();
+    int friendId = js["friendid"].get<int>();
+    _friendModel.Insert(userId,friendId);
 }
 /*
  * 获取消息id对应的处理函数
  */
 MsgHandler ChatService::GetHandler(int msgId)
 {
-    auto it = msgHandlerMap_.find(msgId);
-    if(it != msgHandlerMap_.end())
+    auto it = _msgHandlerMap.find(msgId);
+    if(it != _msgHandlerMap.end())
     {
         //如果找到了消息id对应的处理函数就把函数返回
-        return msgHandlerMap_[msgId];
+        return _msgHandlerMap[msgId];
     }
     else
     {
@@ -129,17 +165,6 @@ MsgHandler ChatService::GetHandler(int msgId)
         };
     }
 }
-/*
- * 注册消息及对应的业务处理
- */
-ChatService::ChatService()
-{
-    //用户基本业务管理相关事件处理回调注册
-    msgHandlerMap_.insert({LOGIN_MSG,std::bind(&ChatService::Login,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
-    msgHandlerMap_.insert({REG_MSG,std::bind(&ChatService::Reg,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
-    msgHandlerMap_.insert({ONE_CHAT_MSG,std::bind(&ChatService::oneChat,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3)});
-}
-
 ChatService::~ChatService()
 {
 
@@ -151,21 +176,21 @@ void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
 {
     User user;
     {
-        std::lock_guard<std::mutex>lk(mtx_);
-        for(auto it = userConnMap_.begin();it!=userConnMap_.end();++it)
+        std::lock_guard<std::mutex>lk(_mtx);
+        for(auto it = _userConnMap.begin(); it != _userConnMap.end(); ++it)
         {
             if(it->second == conn)
             {
                 user.setId(it->first);
                 user.setState("offline");
-                userConnMap_.erase(it);
+                _userConnMap.erase(it);
                 break;
             }
         }
     }
     if(user.getId() != -1)
     {
-        userModel_.UpdateState(user);
+        _userModel.UpdateState(user);
     }
 }
 /*
@@ -173,5 +198,5 @@ void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
  */
 void ChatService::Reset()
 {
-    userModel_.ReState();
+    _userModel.ReState();
 }
