@@ -19,6 +19,10 @@ ChatService::ChatService()
     _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::Reg, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     _msgHandlerMap.insert({ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    //群组业务管理相关事件处理回调注册
+    _msgHandlerMap.insert({CREATE_GROUP_MSG, std::bind(&ChatService::createGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({ADD_GROUP_MSG, std::bind(&ChatService::addGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({GROUP_CHAT_MSG, std::bind(&ChatService::groupChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
 
 }
 /*
@@ -53,7 +57,7 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
             user.setState("online");
             _userModel.UpdateState(user);
             json res;
-            res["msg-id"] = LOGIN_MSG_ACK;
+            res["msgid"] = LOGIN_MSG_ACK;
             res["errno"] = 0;
             res["id"] = user.getId();
             res["name"] = user.getName();
@@ -78,6 +82,34 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
                     friendVec.emplace_back(js.dump());
                 }
                 res["friends"] = friendVec;
+            }
+            //查询用户是否有群
+            std::vector<Group>groupUsrVec = _groupModel.queryGroup(id);
+            if(!groupUsrVec.empty())
+            {
+                //获取群的信息
+                std::vector<std::string>groupVec;
+                for(auto& group:groupUsrVec)
+                {
+                    json groupJson;
+                    groupJson["id"] = group.getId();
+                    groupJson["groupname"] = group.getName();
+                    groupJson["groupdesc"] = group.getDesc();
+                    //获取每个群里成员的信息
+                    std::vector<std::string>usrVec;
+                    for(auto& user:group.getGroupUsers())
+                    {
+                        json userJson;
+                        userJson["id"] = user.getId();
+                        userJson["name"] = user.getName();
+                        userJson["state"] = user.getState();
+                        userJson["role"] = user.getRole();
+                        usrVec.emplace_back(userJson.dump());
+                    }
+                    groupJson["users"] = usrVec;
+                    groupVec.emplace_back(groupJson.dump());
+                }
+                res["groups"] = groupVec;
             }
             conn->send(res.dump());
         }
@@ -134,7 +166,7 @@ void ChatService::oneChat(const muduo::net::TcpConnectionPtr &conn, json &js, mu
         }
     }
     //不在线就存储离线消息
-    _offlineMsgModel.Install(toid, js.dump());
+    _offlineMsgModel.Insert(toid, js.dump());
 }
 /*
  * 添加好友
@@ -144,6 +176,41 @@ void ChatService::addFriend(const muduo::net::TcpConnectionPtr &conn, json &js, 
     int userId = js["id"].get<int>();
     int friendId = js["friendid"].get<int>();
     _friendModel.Insert(userId,friendId);
+}
+
+void ChatService::createGroup(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+{
+    int userId = js["id"].get<int>();
+    Group group(userId,js["groupname"],js["groupdesc"]);
+    if(_groupModel.createGroup(group))
+    {
+        _groupModel.addGroup(userId,group.getId(),"creator");
+    }
+}
+
+void ChatService::addGroup(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+{
+    _groupModel.addGroup(js["id"].get<int>(),js["groupid"].get<int>(),"normal");
+}
+
+void ChatService::groupChat(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+{
+    //获取群里成员的id
+    std::vector<int> idVec = _groupModel.queryGroupUsers(js["id"].get<int>(),js["groupid"].get<int>());
+    for(int id:idVec)
+    {
+        auto it = _userConnMap.find(id);
+        if(it != _userConnMap.end())
+        {
+            //群里在线发送
+            it->second->send(js.dump());
+        }
+        else
+        {
+            //群里不在线离线存储
+            _offlineMsgModel.Insert(id, js.dump());
+        }
+    }
 }
 /*
  * 获取消息id对应的处理函数

@@ -12,7 +12,7 @@ class User
 public:
     User();
     User(int id,std::string name,std::string pwd,std::string state = "offline");
-    ~User();
+    virtual ~User(){}
 
     void setId(int id);
     void setName(std::string name);
@@ -23,7 +23,6 @@ public:
     std::string getName()const;
     std::string getPwd()const ;
     std::string getState()const;
-
 
 private:
     int _id;

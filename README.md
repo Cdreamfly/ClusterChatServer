@@ -59,7 +59,7 @@ json["groupid"]		//群id
 json["msgid"] = GROUP_CHAT_MSG;
 json["id"]			//发送者id
 json["name"]		//发送者姓名
-json["groupid"]		//发送者姓名
+json["groupid"]		//群id
 json["msg"]			//消息内容
 json["time"]		//发送时间
 
@@ -71,7 +71,7 @@ json["id"]			//要注销的id
 ### 测试json
 ```
 登录
-{"msgid":1,"id":2,"pwd":"123456"}
+{"msgid":1,"id":3,"pwd":"123456"}
 
 注册
 {"msgid":4,"id":2,"pwd":"123456"}
@@ -81,4 +81,20 @@ json["id"]			//要注销的id
 
 加好友
 {"msgid":7,"id":2,"friendid":1}
+
+//创建群
+{"msgid":8,"id":1,"groupname":"test","groupdesc":"test"}
+
+//加入群
+{"msgid":9,"id":3,"groupid":1}
+
+//群聊天
+{"msgid":10,"id":1,"name":"mmm","groupid":1,"msg":"hello every one"}
+```
+
+### 问题
+```
+1.发送错误的json程序会挂掉但是异常退出处理程序没有执行，直接关闭窗口却可以。
+2.群聊加群有问题：用户3已加入群但是登录是却没有返回正缺德json
+3.群聊聊天问题：有时候能收到但是等待时间很长。
 ```

@@ -10,7 +10,7 @@ OfflineMsgModel::OfflineMsgModel()
     _mySql.Connect();
 }
 
-void OfflineMsgModel::Install(int id,std::string msg)
+void OfflineMsgModel::Insert(int id, std::string msg)
 {
     std::ostringstream sql;
     sql<<"insert into offlinemessage values('"<<id<<"','"<<msg<<"')";

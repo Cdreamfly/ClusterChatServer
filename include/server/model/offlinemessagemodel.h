@@ -15,7 +15,7 @@ class OfflineMsgModel
 public:
     OfflineMsgModel();
     //存储离线消息
-    void Install (int id,std::string msg);
+    void Insert (int id, std::string msg);
     //删除离线消息
     void Remove(int id);
     //查询离线消息

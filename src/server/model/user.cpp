@@ -8,8 +8,6 @@ User::User(): _id(-1), _name(""), _pwd(""), _state("offline") {}
 
 User::User(int id, std::string name, std::string pwd, std::string state): _id(id), _name(name), _pwd(pwd), _state(state){}
 
-User::~User() {}
-
 void User::setId(int id)
 {
     _id = id;
