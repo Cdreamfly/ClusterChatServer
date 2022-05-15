@@ -90,6 +90,9 @@ json["id"]			//要注销的id
 
 //群聊天
 {"msgid":10,"id":1,"name":"mmm","groupid":1,"msg":"hello every one"}
+
+//注销
+{"msgid":3,"id":1}
 ```
 
 ### 问题
@@ -97,4 +100,43 @@ json["id"]			//要注销的id
 1.发送错误的json程序会挂掉但是异常退出处理程序没有执行，直接关闭窗口却可以。
 2.群聊加群有问题：用户3已加入群但是登录是却没有返回正缺德json
 3.群聊聊天问题：有时候能收到但是等待时间很长。
+```
+
+## nginx负载均衡
+我们客户端的请求先发的nginx，nginx根据配置既定的负载均衡算法，把第一个请求转到第一台服务器，根据权重相等，轮询，下一个客户端连接到第二台服务器。
+### nginx 安装
+```
+nginx编译安装需要先安装pcre、openssl、zlib等库
+进入源码后执行安装需要加入–with-stream参数来激活tcp负载均衡模块。
+./configure --with-stream 
+make && make install
+
+
+```
+### nginx配置
+```
+cd /usr/local/nginx/conf/nginx.conf
+```
+```
+events {
+    worker_connections  1024;
+}
+
+stream {
+    upstream MyServer{
+#server id:port 权重都为1（设,2:1 三次链接两次为2，一次为1）超过三次心跳失败就认为挂掉了，等待心跳时间30s
+       server 127.0.0.1:9190 weight=1 max_fails=3 fail_timeout=30s;
+       server 127.0.0.1:9192 weight=1 max_fails=3 fail_timeout=30s;
+     }
+
+     server {
+#nginx连接服务器超过1s判定失败
+        proxy_connect_timeout 1s;
+        #proxy_timeout 3s;
+        #监听客户端8000端口
+        listen 8000;
+        proxy_pass MyServer;
+        tcp_nodelay on;
+   }
+}
 ```

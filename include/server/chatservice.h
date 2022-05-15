@@ -41,14 +41,15 @@ public:
     void addGroup(const muduo::net::TcpConnectionPtr&conn,json&js, muduo::Timestamp timestamp);
     //群聊天
     void groupChat(const muduo::net::TcpConnectionPtr&conn,json&js, muduo::Timestamp timestamp);
-
+    //注销
+    void loginOut(const muduo::net::TcpConnectionPtr&conn,json&js, muduo::Timestamp timestamp);
     //获取消息id对应的处理函数
     MsgHandler GetHandler(int msgId);
     //处理客户端异常推出
     void clientCloseException(const muduo::net::TcpConnectionPtr& conn);
     //服务器异常处理
     void Reset();
-    ~ChatService();
+    ~ChatService(){}
 
 private:
     ChatService();//单例

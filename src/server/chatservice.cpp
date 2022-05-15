@@ -19,6 +19,7 @@ ChatService::ChatService()
     _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::Reg, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     _msgHandlerMap.insert({ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({LOGINOUT_MSG, std::bind(&ChatService::loginOut, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     //群组业务管理相关事件处理回调注册
     _msgHandlerMap.insert({CREATE_GROUP_MSG, std::bind(&ChatService::createGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     _msgHandlerMap.insert({ADD_GROUP_MSG, std::bind(&ChatService::addGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
@@ -232,10 +233,6 @@ MsgHandler ChatService::GetHandler(int msgId)
         };
     }
 }
-ChatService::~ChatService()
-{
-
-}
 /*
  * 找到异常退出的链接删了它并设置为离线状态
  */
@@ -266,4 +263,18 @@ void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
 void ChatService::Reset()
 {
     _userModel.ReState();
+}
+
+void ChatService::loginOut(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+{
+    int userId = js["id"].get<int>();
+    {
+        std::lock_guard<std::mutex> lk(_mtx);
+        auto it = _userConnMap.find(userId);
+        if (it != _userConnMap.end()) {
+            _userConnMap.erase(it);
+        }
+    }
+    User user(userId,"","","offline");
+    _userModel.UpdateState(user);
 }
