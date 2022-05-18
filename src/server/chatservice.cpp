@@ -24,7 +24,12 @@ ChatService::ChatService()
     _msgHandlerMap.insert({CREATE_GROUP_MSG, std::bind(&ChatService::createGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     _msgHandlerMap.insert({ADD_GROUP_MSG, std::bind(&ChatService::addGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     _msgHandlerMap.insert({GROUP_CHAT_MSG, std::bind(&ChatService::groupChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
-
+    //连接redis服务器
+    if(_redis.Connect())
+    {
+        //设置上报消息的回调
+        _redis.InitNotifyHandler(std::bind(&ChatService::handleRedisSubscribeMessage, this, std::placeholders::_1,std::placeholders::_2));
+    }
 }
 /*
  * 登录
@@ -54,6 +59,8 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
                 std::lock_guard<std::mutex> lk(_mtx);
                 _userConnMap.insert({id, conn});
             }
+            //id用户登录成功后，向redis订阅channel(id)
+            _redis.Subscribe(id);
             //更新用户状态信息 state offline => online
             user.setState("online");
             _userModel.UpdateState(user);
@@ -98,13 +105,13 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
                     groupJson["groupdesc"] = group.getDesc();
                     //获取每个群里成员的信息
                     std::vector<std::string>usrVec;
-                    for(auto& user:group.getGroupUsers())
+                    for(auto& it:group.getGroupUsers())
                     {
                         json userJson;
-                        userJson["id"] = user.getId();
-                        userJson["name"] = user.getName();
-                        userJson["state"] = user.getState();
-                        userJson["role"] = user.getRole();
+                        userJson["id"] = it.getId();
+                        userJson["name"] = it.getName();
+                        userJson["state"] = it.getState();
+                        userJson["role"] = it.getRole();
                         usrVec.emplace_back(userJson.dump());
                     }
                     groupJson["users"] = usrVec;
@@ -164,7 +171,15 @@ void ChatService::oneChat(const muduo::net::TcpConnectionPtr &conn, json &js, mu
         {
             //如果在线就发送消息
             it->second->send(js.dump());
+            return;
         }
+    }
+    //跨服务器发送
+    User user = _userModel.Query(toid);
+    if(user.getState() == "online")
+    {
+        _redis.Publish(toid,js.dump());
+        return ;
     }
     //不在线就存储离线消息
     _offlineMsgModel.Insert(toid, js.dump());
@@ -182,7 +197,7 @@ void ChatService::addFriend(const muduo::net::TcpConnectionPtr &conn, json &js, 
 void ChatService::createGroup(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
 {
     int userId = js["id"].get<int>();
-    Group group(userId,js["groupname"],js["groupdesc"]);
+    Group group(-1,js["groupname"],js["groupdesc"]);
     if(_groupModel.createGroup(group))
     {
         _groupModel.addGroup(userId,group.getId(),"creator");
@@ -208,8 +223,17 @@ void ChatService::groupChat(const muduo::net::TcpConnectionPtr &conn, json &js, 
         }
         else
         {
-            //群里不在线离线存储
-            _offlineMsgModel.Insert(id, js.dump());
+            //如果群里的人在不同服务器
+            User user = _userModel.Query(id);
+            if(user.getState() == "online")
+            {
+                _redis.Publish(id,js.dump());
+            }
+            else
+            {
+                //群里不在线离线存储
+                _offlineMsgModel.Insert(id, js.dump());
+            }
         }
     }
 }
@@ -246,14 +270,16 @@ void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
             if(it->second == conn)
             {
                 user.setId(it->first);
-                user.setState("offline");
                 _userConnMap.erase(it);
                 break;
             }
         }
     }
+    //用户注销，相当于就是下线，在redis中取消订阅通道
+    _redis.UnSubscribe(user.getId());
     if(user.getId() != -1)
     {
+        user.setState("offline");
         _userModel.UpdateState(user);
     }
 }
@@ -275,6 +301,22 @@ void ChatService::loginOut(const muduo::net::TcpConnectionPtr &conn, json &js, m
             _userConnMap.erase(it);
         }
     }
+    //用户注销，相当于就是下线，在redis中取消订阅通道
+    _redis.UnSubscribe(userId);
+    //更新用户的状态信息
     User user(userId,"","","offline");
     _userModel.UpdateState(user);
+}
+void ChatService::handleRedisSubscribeMessage(int userId, std::string msg)
+{
+    std::lock_guard<std::mutex> lk(_mtx);
+    auto it = _userConnMap.find(userId);
+    if(it != _userConnMap.end())
+    {
+        it->second->send(msg);
+    }
+    else
+    {
+        _offlineMsgModel.Insert(userId,msg);
+    }
 }

@@ -9,12 +9,13 @@
 #include <functional>
 #include <mutex>
 #include "muduo/net/TcpConnection.h"
-#include "json.hpp"
-#include "public.h"
 #include "server/model/usermodel.h"
 #include "server/model/offlinemessagemodel.h"
 #include "server/model/friendmodel.h"
 #include "server/model/groupmodel.h"
+#include "server/db/redis.h"
+#include "json.hpp"
+#include "public.h"
 
 using json = nlohmann::json;
 using MsgHandler = std::function<void(const muduo::net::TcpConnectionPtr&,json&, muduo::Timestamp)>;
@@ -47,6 +48,8 @@ public:
     MsgHandler GetHandler(int msgId);
     //处理客户端异常推出
     void clientCloseException(const muduo::net::TcpConnectionPtr& conn);
+    //从redis消息队列中获取订阅的消息
+    void handleRedisSubscribeMessage(int,std::string);
     //服务器异常处理
     void Reset();
     ~ChatService(){}
@@ -62,6 +65,7 @@ private:
     OfflineMsgModel _offlineMsgModel;   //离线消息业务
     FriendModel _friendModel;   //好友业务
     GroupModel _groupModel; //群业务
+    Redis _redis;
 };
 
 #endif //CLUSTERCHAT_CHATSERVICE_H

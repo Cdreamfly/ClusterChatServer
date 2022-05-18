@@ -1,6 +1,13 @@
 ## C++ 集群聊天
 
-
+### 编译
+所需库引入
+```
+git clone https://github.com/redis/hiredis 从github上下载hiredis客户端，进行源码编译安装
+cd hiredis
+make
+sudo make install
+```
 ### 通信格式
 服务器和客户端的通信采用了JSON来完成数据在网络中的标准传输。
 对于不同的数据则是采用了不同的格式，具体如下：

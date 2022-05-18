@@ -25,4 +25,5 @@ target_link_libraries(ClusterChat
         libmuduo_inspect.a
         libmuduo_base.a
         mysqlclient
+        hiredis
         pthread)
