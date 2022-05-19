@@ -29,7 +29,7 @@ bool GroupModel::createGroup(Group &group)
 void GroupModel::addGroup(int userId, int groupId, std::string role)
 {
     std::ostringstream sql;
-    sql<<"insert into groupuser values("<<userId<<","<<groupId<<",'"<<role<<"')";
+    sql<<"insert into groupuser values("<<groupId<<","<<userId<<",'"<<role<<"')";
     std::string temp = sql.str();
     _mySql.Update(temp);
 }

@@ -27,3 +27,5 @@ target_link_libraries(ClusterChat
         mysqlclient
         hiredis
         pthread)
+#加载子目录
+add_subdirectory(src/client)
