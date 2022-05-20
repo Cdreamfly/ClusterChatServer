@@ -218,6 +218,7 @@ void showCurrentUserData()
 //处理登陆的响应逻辑
 void doLoginResponse(json &responsejs)
 {
+    std::cout<<responsejs<<std::endl;
     if (responsejs["errno"].get<int>() != 0) // 登陆失败
     {
         cerr << responsejs["errmsg"] << endl;
@@ -288,7 +289,7 @@ void doLoginResponse(json &responsejs)
             for (string &str : vec)
             {
                 json js = json::parse(str);
-
+                std::cout<<js<<std::endl
                 int msgtype = js["msgid"].get<int>();
                 if (msgtype == ONE_CHAT_MSG)
                 {
