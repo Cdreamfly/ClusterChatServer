@@ -6,14 +6,14 @@
 #include <sstream>
 FriendModel::FriendModel()
 {
-    _mySql.Connect();
+    _mySql->Connect();
 }
 void FriendModel::Insert(int userId, int friendId)
 {
     std::ostringstream sql;
     sql<<"insert into friend values("<<userId<<","<<friendId<<")";
     std::string temp = sql.str();
-    _mySql.Update(temp);
+    _mySql->Update(temp);
 }
 
 std::vector<User> FriendModel::Query(int userId)
@@ -21,7 +21,7 @@ std::vector<User> FriendModel::Query(int userId)
     std::ostringstream sql;
     sql<<"select a.id,a.name,a.state from user a inner join friend b on b.friendid = a.id where b.userid = "<<userId;
     std::string temp = sql.str();
-    MYSQL_RES*res = _mySql.Query(temp);
+    MYSQL_RES*res = _mySql->Query(temp);
     std::vector<User>vec;
     if(res != nullptr)
     {
