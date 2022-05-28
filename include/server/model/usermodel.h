@@ -11,18 +11,19 @@
 class UserModel
 {
 public:
-    UserModel();
+    using ptr = std::shared_ptr<UserModel>;
+    explicit UserModel();
     //添加用户
-    bool Insert(User&user);
+    bool Insert(const User::ptr &user);
     //查询用户
     User Query(int id);
     //更新用户状态
-    bool UpdateState(User&user);
+    bool UpdateState(const User::ptr &user);
     //重置用户状态
     bool ReState();
 
 private:
-    MySQL _mySql;
+    std::shared_ptr<MySQL>_mySql;
 };
 
 

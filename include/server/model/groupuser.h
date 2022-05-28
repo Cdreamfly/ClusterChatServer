@@ -13,8 +13,9 @@
 class GroupUser:public User
 {
 public:
-    GroupUser();
-    ~GroupUser();
+    using ptr = std::shared_ptr<GroupUser>;
+    explicit GroupUser();
+    ~GroupUser()noexcept;
     void setRole(std::string role);
     std::string getRole()const;
 private:

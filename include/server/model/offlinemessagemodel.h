@@ -8,12 +8,14 @@
 #include <string>
 #include <vector>
 #include "server/db/db.h"
+#include <memory>
 
 //提供离线消息表的操作接口方法
 class OfflineMsgModel
 {
 public:
-    OfflineMsgModel();
+    using ptr = std::shared_ptr<OfflineMsgModel>;
+    explicit OfflineMsgModel();
     //存储离线消息
     void Insert (int id, std::string msg);
     //删除离线消息
@@ -21,7 +23,7 @@ public:
     //查询离线消息
     std::vector<std::string> Query(int id);
 private:
-    MySQL _mySql;
+    std::shared_ptr<MySQL>_mySql;
 };
 
 #endif //CLUSTERCHAT_OFFLINEMESSAGEMODEL_H

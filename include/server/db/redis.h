@@ -7,12 +7,13 @@
 
 #include <functional>
 #include <hiredis/hiredis.h>
-
+#include <memory>
 class Redis
 {
 public:
-    Redis();
-    ~Redis();
+    using ptr = std::shared_ptr<Redis>;
+    explicit Redis();
+    ~Redis()noexcept;
     //连接redis服务器
     bool Connect();
     //向redis指定的通道channel发布消息

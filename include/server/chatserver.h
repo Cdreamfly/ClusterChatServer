@@ -15,14 +15,14 @@
 class ChatServer
 {
 public:
-    ChatServer(muduo::net::EventLoop*loop,const muduo::net::InetAddress&addr,const std::string &msg);
+    explicit ChatServer(muduo::net::EventLoop*loop,const muduo::net::InetAddress&addr,const std::string &msg);
     void Start();
-    ~ChatServer();
-private:
+    ~ChatServer()noexcept;
+/*private:
     //上报链接相关回调函数
     void onConnection(const muduo::net::TcpConnectionPtr &conn);
     //上报读写相关回调函数
-    void onMessage(const muduo::net::TcpConnectionPtr&conn,muduo::net::Buffer*buf,muduo::Timestamp timestamp);
+    void onMessage(const muduo::net::TcpConnectionPtr&conn,muduo::net::Buffer*buf,muduo::Timestamp timestamp);*/
 private:
     muduo::net::TcpServer _server;
     muduo::net::EventLoop* _loop;

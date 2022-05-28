@@ -8,19 +8,19 @@
 
 GroupModel::GroupModel()
 {
-    _mySql.Connect();
+    _mySql->Connect();
 }
 
 GroupModel::~GroupModel() {}
 
-bool GroupModel::createGroup(Group &group)
+bool GroupModel::createGroup(const Group::ptr &group)
 {
     std::ostringstream sql;
-    sql<<"insert into allgroup(groupname,groupdesc) values('"<<group.getName()<<"','"<<group.getDesc()<<"')";
+    sql<<"insert into allgroup(groupname,groupdesc) values('"<<group->getName()<<"','"<<group->getDesc()<<"')";
     std::string temp = sql.str();
-    if(_mySql.Update(temp))
+    if(_mySql->Update(temp))
     {
-        group.setId(mysql_insert_id(_mySql.GetConnect()));
+        group->setId(mysql_insert_id(_mySql->GetConnect()));
         return true;
     }
     return false;
@@ -31,7 +31,7 @@ void GroupModel::addGroup(int userId, int groupId, std::string role)
     std::ostringstream sql;
     sql<<"insert into groupuser values("<<groupId<<","<<userId<<",'"<<role<<"')";
     std::string temp = sql.str();
-    _mySql.Update(temp);
+    _mySql->Update(temp);
 }
 
 std::vector<Group> GroupModel::queryGroup(int userId)
@@ -39,7 +39,7 @@ std::vector<Group> GroupModel::queryGroup(int userId)
     std::ostringstream sql;
     sql<<"select a.id,a.groupname,a.groupdesc from allgroup a inner join groupuser b on a.id = b.groupid where b.userid = "<<userId;
     std::string temp = sql.str();
-    MYSQL_RES*res = _mySql.Query(temp);
+    MYSQL_RES*res = _mySql->Query(temp);
     std::vector<Group>groupVec;
     if(res != nullptr)
     {
@@ -56,7 +56,7 @@ std::vector<Group> GroupModel::queryGroup(int userId)
         sql.str("");
         sql<<"select a.id,a.name,a.state,b.grouprole from user a inner join groupuser b on b.userid = a.id where b.groupid = "<<it.getId();
         std::string temp = sql.str();
-        MYSQL_RES *res = _mySql.Query(temp);
+        MYSQL_RES *res = _mySql->Query(temp);
         if(res != nullptr)
         {
             MYSQL_ROW row;
@@ -80,7 +80,7 @@ std::vector<int> GroupModel::queryGroupUsers(int userId, int groupId)
     std::ostringstream sql;
     sql<<"select userid from groupuser where groupid = "<<groupId<<" and userid != "<< userId;
     std::string temp = sql.str();
-    MYSQL_RES*res = _mySql.Query(temp);
+    MYSQL_RES*res = _mySql->Query(temp);
     std::vector<int>vec;
     if(res != nullptr)
     {

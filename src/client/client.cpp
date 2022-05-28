@@ -120,7 +120,7 @@ int main(int argc, char **argv)
                 cin.getline(pwd, 50);
 
                 json js;
-                js["msgid"] = LOGIN_MSG;
+                js["msgid"] = EnMsgType::LOGIN_MSG;
                 js["id"] = id;
                 js["pwd"] = pwd;
                 string request = js.dump();
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
                 cin.getline(pwd, 50);
 
                 json js;
-                js["msgid"] = REG_MSG;
+                js["msgid"] = EnMsgType::REG_MSG;
                 js["name"] = name;
                 js["pwd"] = pwd;
                 string request = js.dump();
@@ -289,9 +289,9 @@ void doLoginResponse(json &responsejs)
             for (string &str : vec)
             {
                 json js = json::parse(str);
-                std::cout<<js<<std::endl
-                int msgtype = js["msgid"].get<int>();
-                if (msgtype == ONE_CHAT_MSG)
+                std::cout<<js<<std::endl;
+                EnMsgType msgtype = js["msgid"].get<EnMsgType>();
+                if (msgtype == EnMsgType::ONE_CHAT_MSG)
                 {
 
                     cout << js["time"].get<string>() << " [" << js["id"] << "]" << js["name"].get<string>()
@@ -334,28 +334,28 @@ void readTaskHandler(int clientfd)
         }
         //接收了server转发的对象，js反序列化
         json js = json::parse(buffer);
-        int msgtype = js["msgid"].get<int>();
-        if (msgtype == ONE_CHAT_MSG)
+        EnMsgType msgtype = js["msgid"].get<EnMsgType>();
+        if (msgtype == EnMsgType::ONE_CHAT_MSG)
         {
 
             cout << js["time"].get<string>() << " [" << js["id"] << "]" << js["name"].get<string>()
                  << " said: " << js["msg"].get<string>() << endl;
             continue;
         }
-        if (GROUP_CHAT_MSG == msgtype)
+        if (EnMsgType::GROUP_CHAT_MSG == msgtype)
         {
             cout << "群消息[" << js["groupid"] << "]:" << js["time"].get<string>() << " [" << js["id"] << "]" << js["name"].get<string>()
                  << " said: " << js["msg"].get<string>() << endl;
             continue;
         }
 
-        if (LOGIN_MSG_ACK == msgtype)
+        if (EnMsgType::LOGIN_MSG_ACK == msgtype)
         {
             doLoginResponse(js); //处理登陆响应的业务逻辑
             sem_post(&rwsem);
             continue;
         }
-        if (REG_MSG_ACK == msgtype)
+        if (EnMsgType::REG_MSG_ACK == msgtype)
         {
             doRegResponse(js);
             //通知主线程，注册结果处理完成
@@ -447,7 +447,7 @@ void addfriend(int clientfd, string str)
 {
     int friendid = atoi(str.c_str());
     json js;
-    js["msgid"] = ADD_FRIEND_MSG;
+    js["msgid"] = EnMsgType::ADD_FRIEND_MSG;
     js["id"] = g_currentUser.getId();
     js["friendid"] = friendid;
     string buffer = js.dump();
@@ -472,7 +472,7 @@ void chat(int clientfd, string str)
     string message = str.substr(idx + 1, str.size() - idx);
 
     json js;
-    js["msgid"] = ONE_CHAT_MSG;
+    js["msgid"] = EnMsgType::ONE_CHAT_MSG;
     js["id"] = g_currentUser.getId();
     js["name"] = g_currentUser.getName();
     js["toid"] = friendid;
@@ -500,7 +500,7 @@ void creategroup(int clientfd, string str)
     string groupdesc = str.substr(idx + 1, str.size() - idx);
 
     json js;
-    js["msgid"] = CREATE_GROUP_MSG;
+    js["msgid"] = EnMsgType::CREATE_GROUP_MSG;
     js["id"] = g_currentUser.getId();
     js["groupname"] = groupname;
     js["groupdesc"] = groupdesc;
@@ -517,7 +517,7 @@ void addgroup(int clientfd, string str)
 {
     int groupid = atoi(str.c_str());
     json js;
-    js["msgid"] = ADD_GROUP_MSG;
+    js["msgid"] = EnMsgType::ADD_GROUP_MSG;
     js["id"] = g_currentUser.getId();
     js["groupid"] = groupid;
     string buffer = js.dump();
@@ -542,7 +542,7 @@ void groupchat(int clientfd, string str)
     string message = str.substr(idx + 1, str.size() - idx);
 
     json js;
-    js["msgid"] = GROUP_CHAT_MSG;
+    js["msgid"] = EnMsgType::GROUP_CHAT_MSG;
     js["id"] = g_currentUser.getId();
     js["name"] = g_currentUser.getName();
     js["groupid"] = groupid;
@@ -560,7 +560,7 @@ void groupchat(int clientfd, string str)
 void loginout(int clientfd, string)
 {
     json js;
-    js["msgid"] = LOGINOUT_MSG;
+    js["msgid"] = EnMsgType::LOGINOUT_MSG;
     js["id"] = g_currentUser.getId();
     string buffer = js.dump();
 

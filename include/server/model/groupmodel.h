@@ -11,10 +11,11 @@
 class GroupModel
 {
 public:
-    GroupModel();
-    ~GroupModel();
+    using ptr= std::shared_ptr<GroupModel>;
+    explicit GroupModel();
+    ~GroupModel()noexcept;
     //创建群
-    bool createGroup(Group&group);
+    bool createGroup(const Group::ptr &group);
     //添加群
     void addGroup(int userId,int groupId,std::string role);
     //查询用户所在群组信息  在客户端呈现
@@ -22,7 +23,7 @@ public:
     //查询群里用户id，除userid自己
     std::vector<int>queryGroupUsers(int userId,int groupId);
 private:
-    MySQL _mySql;
+    std::shared_ptr<MySQL>_mySql;
 };
 
 #endif //CLUSTERCHAT_GROUPMODEL_H

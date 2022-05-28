@@ -7,11 +7,13 @@
 
 #include "server/model/groupuser.h"
 #include <vector>
+#include <memory>
 
 class Group
 {
 public:
-    Group(int id = -1,std::string name = "",std::string desc = "");
+    using ptr = std::shared_ptr<Group>;
+    explicit Group(int id = -1,std::string name = "",std::string desc = "");
 
     void setId(int id);
     void setName(std::string name);

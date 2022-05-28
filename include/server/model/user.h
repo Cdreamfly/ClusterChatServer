@@ -6,13 +6,14 @@
 #define CLUSTERCHAT_USER_H
 
 #include<string>
-
+#include <memory>
 class User
 {
 public:
-    User();
-    User(int id,std::string name,std::string pwd,std::string state = "offline");
-    virtual ~User(){}
+    using ptr = std::shared_ptr<User>;
+    explicit User();
+    explicit User(int id,std::string name,std::string pwd,std::string state = "offline");
+    virtual ~User()noexcept{}
 
     void setId(int id);
     void setName(std::string name);
