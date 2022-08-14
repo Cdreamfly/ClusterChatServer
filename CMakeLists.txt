@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ClusterChat)
+project(ClusterChatServer)
 set(CMAKE_CXX_STANDARD 14)
 
 file(GLOB SRC_FILES
@@ -19,7 +19,7 @@ include_directories(
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC_FILES})
 
-target_link_libraries(ClusterChat
+target_link_libraries(ClusterChatServer
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/libmuduo_net.a
         libmuduo_http.a
         libmuduo_inspect.a
@@ -28,4 +28,4 @@ target_link_libraries(ClusterChat
         hiredis
         pthread)
 #加载子目录
-add_subdirectory(src/client)
+#add_subdirectory(src/client)
