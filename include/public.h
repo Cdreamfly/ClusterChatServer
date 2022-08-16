@@ -5,7 +5,7 @@
 #ifndef CLUSTERCHAT_PUBLIC_H
 #define CLUSTERCHAT_PUBLIC_H
 
-enum class EnMsgType:int
+enum EnMsgType
 {
     LOGIN_MSG = 1,  // 登录消息
     LOGIN_MSG_ACK = 2,  // 登录响应消息
