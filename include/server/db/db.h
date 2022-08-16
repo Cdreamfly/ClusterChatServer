@@ -12,9 +12,9 @@ class MySQL
 {
 public:
     //初始化
-    explicit MySQL();
+    MySQL();
     //释放
-    ~MySQL()noexcept;
+    ~MySQL();
     //链接数据库
     bool Connect();
     //更新操作
@@ -25,6 +25,6 @@ public:
     MYSQL* GetConnect();
 
 private:
-    MYSQL *_conn; //句柄
+    MYSQL *conn_; //句柄
 };
 #endif //CLUSTERCHAT_DB_H
