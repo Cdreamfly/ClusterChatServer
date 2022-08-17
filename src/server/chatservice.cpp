@@ -15,15 +15,15 @@ ChatService &ChatService::Instance()
 ChatService::ChatService()
 {
     //用户基本业务管理相关事件处理回调注册
-    _msgHandlerMap.insert({LOGIN_MSG, std::bind(&ChatService::Login, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
-    _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::Reg, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
-    _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
-    _msgHandlerMap.insert({ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
-    _msgHandlerMap.insert({LOGINOUT_MSG, std::bind(&ChatService::loginOut, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({EnMsgType::LOGIN_MSG, std::bind(&ChatService::Login, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({EnMsgType::REG_MSG, std::bind(&ChatService::Reg, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({EnMsgType::ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({EnMsgType::ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({EnMsgType::LOGINOUT_MSG, std::bind(&ChatService::loginOut, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     //群组业务管理相关事件处理回调注册
-    _msgHandlerMap.insert({CREATE_GROUP_MSG, std::bind(&ChatService::createGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
-    _msgHandlerMap.insert({ADD_GROUP_MSG, std::bind(&ChatService::addGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
-    _msgHandlerMap.insert({GROUP_CHAT_MSG, std::bind(&ChatService::groupChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({EnMsgType::CREATE_GROUP_MSG, std::bind(&ChatService::createGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({EnMsgType::ADD_GROUP_MSG, std::bind(&ChatService::addGroup, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
+    _msgHandlerMap.insert({EnMsgType::GROUP_CHAT_MSG, std::bind(&ChatService::groupChat, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)});
     //连接redis服务器
     if(_redis.Connect())
     {
@@ -46,7 +46,7 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
         if(user.getState() == "online")
         {
             json res;
-            res["msgid"] = LOGIN_MSG_ACK;
+            res["msgid"] = EnMsgType::LOGIN_MSG_ACK;
             res["errno"] = 2;
             res["errmsg"] = "this account is using, input another!";
             conn->send(res.dump());
@@ -65,7 +65,7 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
             user.setState("online");
             _userModel.UpdateState(user);
             json res;
-            res["msgid"] = LOGIN_MSG_ACK;
+            res["msgid"] = EnMsgType::LOGIN_MSG_ACK;
             res["errno"] = 0;
             res["id"] = user.getId();
             res["name"] = user.getName();
@@ -126,7 +126,7 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
     {
         //不正确或找不到的返回
         json res;
-        res["msgid"] = LOGIN_MSG_ACK;
+        res["msgid"] = EnMsgType::LOGIN_MSG_ACK;
         res["errno"] = 1;
         res["errmsg"] = "id or password is invalid!";
         conn->send(res.dump());
@@ -143,7 +143,7 @@ void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo:
     {
         //插入新用户成功
         json res;
-        res["msgid"] = REG_MSG_ACK;
+        res["msgid"] = EnMsgType::REG_MSG_ACK;
         res["errno"] = 0;
         res["id"] = user.getId();
         conn->send(res.dump());
@@ -152,7 +152,7 @@ void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo:
     {
         //插入新用户失败
         json res;
-        res["msgid"] = REG_MSG_ACK;
+        res["msgid"] = EnMsgType::REG_MSG_ACK;
         res["errno"] = 1;
         res["id"] = user.getId();
         conn->send(res.dump());
@@ -240,7 +240,7 @@ void ChatService::groupChat(const muduo::net::TcpConnectionPtr &conn, json &js, 
 /*
  * 获取消息id对应的处理函数
  */
-MsgHandler ChatService::GetHandler(int msgId)
+MsgHandler ChatService::GetHandler(EnMsgType msgId)
 {
     auto it = _msgHandlerMap.find(msgId);
     if(it != _msgHandlerMap.end())
@@ -253,7 +253,7 @@ MsgHandler ChatService::GetHandler(int msgId)
         //没找到就返回一个空操作的处理函数
         return [=](const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
         {
-            LOG_ERROR<<"MsgId:"<<msgId<<" Can not find handler!";
+            LOG_ERROR<<"MsgId:"<< static_cast<int>(msgId) <<" Can not find handler!";
         };
     }
 }

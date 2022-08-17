@@ -5,8 +5,7 @@
 #ifndef CLUSTERCHAT_PUBLIC_H
 #define CLUSTERCHAT_PUBLIC_H
 
-enum EnMsgType
-{
+enum class EnMsgType : int {
     LOGIN_MSG = 1,  // 登录消息
     LOGIN_MSG_ACK = 2,  // 登录响应消息
     LOGINOUT_MSG = 3,   // 注销消息
@@ -17,7 +16,6 @@ enum EnMsgType
     CREATE_GROUP_MSG = 8, // 创建群组
     ADD_GROUP_MSG = 9,    // 加入群组
     GROUP_CHAT_MSG = 10,   // 群聊天
-
 };
 
 #endif //CLUSTERCHAT_PUBLIC_H

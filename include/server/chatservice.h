@@ -45,7 +45,7 @@ public:
     //注销
     void loginOut(const muduo::net::TcpConnectionPtr&conn,json&js, muduo::Timestamp timestamp);
     //获取消息id对应的处理函数
-    MsgHandler GetHandler(int msgId);
+    MsgHandler GetHandler(EnMsgType msgId);
     //处理客户端异常推出
     void clientCloseException(const muduo::net::TcpConnectionPtr& conn);
     //从redis消息队列中获取订阅的消息
@@ -58,7 +58,7 @@ private:
     ChatService();//单例
 
 private:
-    std::unordered_map<int,MsgHandler> _msgHandlerMap;  //一个消息id对应一个处理函数
+    std::unordered_map<EnMsgType,MsgHandler> _msgHandlerMap;  //一个消息id对应一个处理函数
     std::unordered_map<int,muduo::net::TcpConnectionPtr> _userConnMap;  //存储在线用户连接信息
     std::mutex _mtx;
     UserModel _userModel;   //用户业务
