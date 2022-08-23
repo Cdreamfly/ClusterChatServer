@@ -15,15 +15,13 @@ link_directories(
 )
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/CmfNet
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC_FILES})
 
 target_link_libraries(ClusterChatServer
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/libmuduo_net.a
-        libmuduo_http.a
-        libmuduo_inspect.a
-        libmuduo_base.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs/libCmfNet.a
         mysqlclient
         hiredis
         pthread)

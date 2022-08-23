@@ -3,7 +3,7 @@
 //
 
 #include "server/db/db.h"
-#include "muduo/base/Logging.h"
+#include "CmfNet/base/Log.hpp"
 
 static const std::string HOST = "127.0.0.1";
 static const unsigned int PORT = 3306;
@@ -34,7 +34,7 @@ bool MySQL::Connect()
     conn_ = mysql_real_connect(conn_,HOST.c_str(),USER.c_str(),PWD.c_str(),DB.c_str(),PORT, nullptr,0);
     if(conn_ == nullptr)
     {
-        LOG_ERROR<<"MySQL Connect ERROR!";
+        LOG_ERROR("MySQL Connect ERROR!");
         return false;
     }
     return true;
@@ -44,7 +44,7 @@ MYSQL_RES *MySQL::Query(std::string& sql)
 {
     if(mysql_query(conn_,sql.c_str()) != 0)
     {
-        LOG_INFO<<__FILE__<<":"<<__LINE__<<":"<<sql<<"查询失败:"<< mysql_error(conn_);
+        LOG_INFO("SQL %s 查询失败：%d",sql.c_str(),mysql_error(conn_));
         return nullptr;
     }
     return mysql_use_result(conn_);
@@ -54,7 +54,7 @@ bool MySQL::Update(std::string &sql)
 {
     if(mysql_query(conn_,sql.c_str()) != 0)
     {
-        LOG_INFO<<__FILE__<<":"<<__LINE__<<":"<<sql<<"更新失败:"<< mysql_error(conn_);
+        LOG_INFO("SQL %s 更新失败：%d",sql.c_str(),mysql_error(conn_));
         return false;
     }
     return true;

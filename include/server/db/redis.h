@@ -7,7 +7,7 @@
 
 #include <functional>
 #include <hiredis/hiredis.h>
-
+#include <string>
 class Redis
 {
 public:

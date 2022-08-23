@@ -2,7 +2,7 @@
 // Created by Cmf on 2022/5/11.
 //
 #include "server/chatservice.h"
-#include "muduo/base/Logging.h"
+#include "CmfNet/base/Log.hpp"
 
 ChatService &ChatService::Instance()
 {
@@ -34,7 +34,7 @@ ChatService::ChatService()
 /*
  * 登录
  */
-void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
 {
     int id = js["id"].get<int>();
     std::string pwd = js["pwd"];
@@ -49,7 +49,7 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
             res["msgid"] = EnMsgType::LOGIN_MSG_ACK;
             res["errno"] = 2;
             res["errmsg"] = "this account is using, input another!";
-            conn->send(res.dump());
+            conn->Send(res.dump());
         }
         else
         {
@@ -119,7 +119,7 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
                 }
                 res["groups"] = groupVec;
             }
-            conn->send(res.dump());
+            conn->Send(res.dump());
         }
     }
     else
@@ -129,13 +129,13 @@ void ChatService::Login(const muduo::net::TcpConnectionPtr &conn, json &js, mudu
         res["msgid"] = EnMsgType::LOGIN_MSG_ACK;
         res["errno"] = 1;
         res["errmsg"] = "id or password is invalid!";
-        conn->send(res.dump());
+        conn->Send(res.dump());
     }
 }
 /*
  * 注册
  */
-void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+void ChatService::Reg(const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
 {
     //获取客户端的注册信息创建对象
     User user(-1,js["name"],js["pwd"]);
@@ -146,7 +146,7 @@ void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo:
         res["msgid"] = EnMsgType::REG_MSG_ACK;
         res["errno"] = 0;
         res["id"] = user.getId();
-        conn->send(res.dump());
+        conn->Send(res.dump());
     }
     else
     {
@@ -155,13 +155,13 @@ void ChatService::Reg(const muduo::net::TcpConnectionPtr &conn, json &js, muduo:
         res["msgid"] = EnMsgType::REG_MSG_ACK;
         res["errno"] = 1;
         res["id"] = user.getId();
-        conn->send(res.dump());
+        conn->Send(res.dump());
     }
 }
 /*
  * 私聊
  */
-void ChatService::oneChat(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
 {
     int toid = js["toid"].get<int>();
     {
@@ -170,7 +170,8 @@ void ChatService::oneChat(const muduo::net::TcpConnectionPtr &conn, json &js, mu
         if(it != _userConnMap.end())
         {
             //如果在线就发送消息
-            it->second->send(js.dump());
+            std::cout<<"test send:"<<js;
+            it->second->Send(js.dump());
             return;
         }
     }
@@ -187,14 +188,14 @@ void ChatService::oneChat(const muduo::net::TcpConnectionPtr &conn, json &js, mu
 /*
  * 添加好友
  */
-void ChatService::addFriend(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+void ChatService::addFriend(const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
 {
     int userId = js["id"].get<int>();
     int friendId = js["friendid"].get<int>();
     _friendModel.Insert(userId,friendId);
 }
 
-void ChatService::createGroup(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+void ChatService::createGroup(const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
 {
     int userId = js["id"].get<int>();
     Group group(-1,js["groupname"],js["groupdesc"]);
@@ -204,12 +205,12 @@ void ChatService::createGroup(const muduo::net::TcpConnectionPtr &conn, json &js
     }
 }
 
-void ChatService::addGroup(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+void ChatService::addGroup(const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
 {
     _groupModel.addGroup(js["id"].get<int>(),js["groupid"].get<int>(),"normal");
 }
 
-void ChatService::groupChat(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+void ChatService::groupChat(const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
 {
     //获取群里成员的id
     std::vector<int> idVec = _groupModel.queryGroupUsers(js["id"].get<int>(),js["groupid"].get<int>());
@@ -219,7 +220,7 @@ void ChatService::groupChat(const muduo::net::TcpConnectionPtr &conn, json &js, 
         if(it != _userConnMap.end())
         {
             //群里在线发送
-            it->second->send(js.dump());
+            it->second->Send(js.dump());
         }
         else
         {
@@ -251,16 +252,16 @@ MsgHandler ChatService::GetHandler(EnMsgType msgId)
     else
     {
         //没找到就返回一个空操作的处理函数
-        return [=](const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+        return [=](const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
         {
-            LOG_ERROR<<"MsgId:"<< static_cast<int>(msgId) <<" Can not find handler!";
+            LOG_ERROR("MsgId: %d Can not find handler!", static_cast<int>(msgId));
         };
     }
 }
 /*
  * 找到异常退出的链接删了它并设置为离线状态
  */
-void ChatService::clientCloseException(const muduo::net::TcpConnectionPtr &conn)
+void ChatService::clientCloseException(const TcpConnectionPtr &conn)
 {
     User user;
     {
@@ -291,7 +292,7 @@ void ChatService::Reset()
     _userModel.ReState();
 }
 
-void ChatService::loginOut(const muduo::net::TcpConnectionPtr &conn, json &js, muduo::Timestamp timestamp)
+void ChatService::loginOut(const TcpConnectionPtr &conn, json &js, Timestamp timestamp)
 {
     int userId = js["id"].get<int>();
     {
@@ -313,7 +314,7 @@ void ChatService::handleRedisSubscribeMessage(int userId, std::string msg)
     auto it = _userConnMap.find(userId);
     if(it != _userConnMap.end())
     {
-        it->second->send(msg);
+        it->second->Send(msg);
     }
     else
     {
