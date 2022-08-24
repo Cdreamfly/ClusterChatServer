@@ -6,23 +6,26 @@
 #define CLUSTERCHAT_USERMODEL_H
 
 #include "user.h"
-#include "server/db/db.h"
+#include "server/db/ConnectionPool.h"
 
-class UserModel
-{
+class UserModel {
 public:
     UserModel();
+
     //添加用户
-    bool Insert(User&user);
+    bool Insert(User &user);
+
     //查询用户
     User Query(int id);
+
     //更新用户状态
-    bool UpdateState(User&user);
+    bool UpdateState(User &user);
+
     //重置用户状态
     bool ReState();
 
 private:
-    MySQL _mySql;
+    std::shared_ptr<Connection> _mySql;
 };
 
 

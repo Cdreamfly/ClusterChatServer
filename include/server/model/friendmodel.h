@@ -7,18 +7,20 @@
 
 #include <vector>
 #include "server/model/user.h"
-#include "server/db/db.h"
+#include "server/db/ConnectionPool.h"
 
-class FriendModel
-{
+class FriendModel {
 public:
     FriendModel();
+
     //添加好友关系
-    void Insert(int userId,int friendId);
+    void Insert(int userId, int friendId);
+
     //返回好友列表
-    std::vector<User>Query(int userId);
+    std::vector<User> Query(int userId);
+
 private:
-    MySQL _mySql;
+    std::shared_ptr<Connection> _mySql;
 };
 
 #endif //CLUSTERCHAT_FRIENDMODEL_H

@@ -3,15 +3,14 @@
 //
 #include "server/model/groupuser.h"
 
-GroupUser::GroupUser() :_role(""){}
+GroupUser::GroupUser() : _role("") {}
 
 GroupUser::~GroupUser() noexcept {}
 
-void GroupUser::setRole(std::string role)
-{
+void GroupUser::setRole(std::string role) {
     _role = role;
 }
-std::string GroupUser::getRole() const
-{
+
+std::string GroupUser::getRole() const {
     return _role;
 }

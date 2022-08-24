@@ -7,22 +7,29 @@
 
 #include<string>
 
-class User
-{
+class User {
 public:
     User();
-    User(int id,std::string name,std::string pwd,std::string state = "offline");
-    virtual ~User(){}
+
+    User(int id, std::string name, std::string pwd, std::string state = "offline");
+
+    virtual ~User() {}
 
     void setId(int id);
+
     void setName(std::string name);
+
     void setPwd(std::string pwd);
+
     void setState(std::string state);
 
-    int getId()const ;
-    std::string getName()const;
-    std::string getPwd()const ;
-    std::string getState()const;
+    int getId() const;
+
+    std::string getName() const;
+
+    std::string getPwd() const;
+
+    std::string getState() const;
 
 private:
     int _id;
