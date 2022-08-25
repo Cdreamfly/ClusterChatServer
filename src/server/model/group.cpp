@@ -4,17 +4,17 @@
 
 #include "server/model/group.h"
 
-Group::Group(int id, std::string name, std::string desc) : _id(id), _name(name), _desc(desc) {}
+Group::Group(const int id, const std::string &name, const std::string &desc) : _id(id), _name(name), _desc(desc) {}
 
-void Group::setId(int id) {
+void Group::setId(const int id) {
     _id = id;
 }
 
-void Group::setName(std::string name) {
+void Group::setName(const std::string &name) {
     _name = name;
 }
 
-void Group::setDesc(std::string desc) {
+void Group::setDesc(const std::string &desc) {
     _desc = desc;
 }
 

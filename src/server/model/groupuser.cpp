@@ -7,7 +7,7 @@ GroupUser::GroupUser() : _role("") {}
 
 GroupUser::~GroupUser() noexcept {}
 
-void GroupUser::setRole(std::string role) {
+void GroupUser::setRole(const std::string& role) {
     _role = role;
 }
 

@@ -10,13 +10,13 @@
 
 class Group {
 public:
-    Group(int id = -1, std::string name = "", std::string desc = "");
+    Group(const int id = -1, const std::string &name = "", const std::string &desc = "");
 
-    void setId(int id);
+    void setId(const int id);
 
-    void setName(std::string name);
+    void setName(const std::string &name);
 
-    void setDesc(std::string desc);
+    void setDesc(const std::string &desc);
 
     int getId() const;
 

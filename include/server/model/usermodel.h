@@ -10,22 +10,17 @@
 
 class UserModel {
 public:
-    UserModel();
-
     //添加用户
     bool Insert(User &user);
 
     //查询用户
-    User Query(int id);
+    User Query(const int id);
 
     //更新用户状态
-    bool UpdateState(User &user);
+    bool UpdateState(const User &user);
 
     //重置用户状态
     bool ReState();
-
-private:
-    std::shared_ptr<Connection> _mySql;
 };
 
 

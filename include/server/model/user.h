@@ -11,17 +11,17 @@ class User {
 public:
     User();
 
-    User(int id, std::string name, std::string pwd, std::string state = "offline");
+    User(const int id, const std::string &name, const std::string &pwd, const std::string &state = "offline");
 
     virtual ~User() {}
 
-    void setId(int id);
+    void setId(const int id);
 
-    void setName(std::string name);
+    void setName(const std::string &name);
 
-    void setPwd(std::string pwd);
+    void setPwd(const std::string &pwd);
 
-    void setState(std::string state);
+    void setState(const std::string &state);
 
     int getId() const;
 

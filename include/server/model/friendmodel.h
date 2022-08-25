@@ -11,16 +11,11 @@
 
 class FriendModel {
 public:
-    FriendModel();
-
     //添加好友关系
-    void Insert(int userId, int friendId);
+    void Insert(const int userId, const int friendId);
 
     //返回好友列表
-    std::vector<User> Query(int userId);
-
-private:
-    std::shared_ptr<Connection> _mySql;
+    std::vector<User> Query(const int userId);
 };
 
 #endif //CLUSTERCHAT_FRIENDMODEL_H

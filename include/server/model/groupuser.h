@@ -16,7 +16,7 @@ public:
 
     ~GroupUser();
 
-    void setRole(std::string role);
+    void setRole(const std::string &role);
 
     std::string getRole() const;
 
