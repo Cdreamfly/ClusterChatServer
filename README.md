@@ -77,7 +77,7 @@ json["time"]		//发送时间
 json["msgid"] = CREATE_GROUP_MSG;
 json["id"]			//群创建者id
 json["groupname"]	//群名
-json["groupdesc"]	//群描述
+json["groupdesc"]	//群描述 creator 创建者 normal 群员
 
 8.加入群
 json["msgid"] = ADD_GROUP_MSG;

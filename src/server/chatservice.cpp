@@ -26,7 +26,7 @@ ChatService::ChatService() {
     _msgHandlerMap.insert({EnMsgType::ADD_FRIEND_MSG,
                            std::bind(&ChatService::addFriend, this, std::placeholders::_1, std::placeholders::_2,
                                      std::placeholders::_3)});
-    _msgHandlerMap.insert({EnMsgType::LOGINOUT_MSG,
+    _msgHandlerMap.insert({EnMsgType::LOGIN_OUT_MSG,
                            std::bind(&ChatService::loginOut, this, std::placeholders::_1, std::placeholders::_2,
                                      std::placeholders::_3)});
     //群组业务管理相关事件处理回调注册
@@ -51,17 +51,17 @@ ChatService::ChatService() {
  * 登录
  */
 void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timestamp) {
-    int id = js["id"].get<int>();
-    std::string pwd = js["pwd"];
+    int id = js[Agreement::ID].get<int>();
+    std::string pwd = js[Agreement::PASSWORD];
     User user = _userModel.Query(id);
     //如果id和密码正确
     if (user.getId() == id && user.getPwd() == pwd) {
         //如果已经是登录状态
-        if (user.getState() == "online") {
+        if (user.getState() == Agreement::ONLINE) {
             json res;
-            res["msgid"] = EnMsgType::LOGIN_MSG_ACK;
-            res["errno"] = 2;
-            res["errmsg"] = "this account is using, input another!";
+            res[Agreement::MSG_ID] = EnMsgType::LOGIN_MSG_ACK;
+            res[Agreement::ERRNO] = LogInErrCode::N0_ONLINE;
+            res[Agreement::ERRMSG] = "this account is using, input another!";
             conn->Send(res.dump());
         } else {
             //不是则登录
@@ -73,17 +73,17 @@ void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timest
             //id用户登录成功后，向redis订阅channel(id)
             _redis.Subscribe(id);
             //更新用户状态信息 state offline => online
-            user.setState("online");
+            user.setState(Agreement::ONLINE);
             _userModel.UpdateState(user);
             json res;
-            res["msgid"] = EnMsgType::LOGIN_MSG_ACK;
-            res["errno"] = 0;
-            res["id"] = user.getId();
-            res["name"] = user.getName();
+            res[Agreement::MSG_ID] = EnMsgType::LOGIN_MSG_ACK;
+            res[Agreement::ERRNO] = LogInErrCode::SUCCESS;
+            res[Agreement::ID] = user.getId();
+            res[Agreement::NAME] = user.getName();
             //查询是否有离线消息
             std::vector<std::string> vec = _offlineMsgModel.Query(id);
             if (!vec.empty()) {
-                res["offlinemsg"] = vec;
+                res[Agreement::OFFLINE_MSG] = vec;
                 _offlineMsgModel.Remove(id);
             }
             //查询是否有好友
@@ -92,9 +92,9 @@ void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timest
                 std::vector<std::string> friendVec;
                 for (auto &it: userVec) {
                     json js;
-                    js["id"] = it.getId();
-                    js["name"] = it.getName();
-                    js["state"] = it.getState();
+                    js[Agreement::ID] = it.getId();
+                    js[Agreement::NAME] = it.getName();
+                    js[Agreement::STATE] = it.getState();
                     friendVec.emplace_back(js.dump());
                 }
                 res["friends"] = friendVec;
@@ -106,32 +106,32 @@ void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timest
                 std::vector<std::string> groupVec;
                 for (auto &group: groupUsrVec) {
                     json groupJson;
-                    groupJson["id"] = group.getId();
-                    groupJson["groupname"] = group.getName();
-                    groupJson["groupdesc"] = group.getDesc();
+                    groupJson[Agreement::ID] = group.getId();
+                    groupJson[Agreement::GROUP_NAME] = group.getName();
+                    groupJson[Agreement::GROUP_DESC] = group.getDesc();
                     //获取每个群里成员的信息
                     std::vector<std::string> usrVec;
                     for (auto &it: group.getGroupUsers()) {
                         json userJson;
-                        userJson["id"] = it.getId();
-                        userJson["name"] = it.getName();
-                        userJson["state"] = it.getState();
-                        userJson["role"] = it.getRole();
+                        userJson[Agreement::ID] = it.getId();
+                        userJson[Agreement::NAME] = it.getName();
+                        userJson[Agreement::STATE] = it.getState();
+                        userJson[Agreement::ROLE] = it.getRole();
                         usrVec.emplace_back(userJson.dump());
                     }
-                    groupJson["users"] = usrVec;
+                    groupJson[Agreement::USERS] = usrVec;
                     groupVec.emplace_back(groupJson.dump());
                 }
-                res["groups"] = groupVec;
+                res[Agreement::GROUPS] = groupVec;
             }
             conn->Send(res.dump());
         }
     } else {
         //不正确或找不到的返回
         json res;
-        res["msgid"] = EnMsgType::LOGIN_MSG_ACK;
-        res["errno"] = 1;
-        res["errmsg"] = "id or password is invalid!";
+        res[Agreement::MSG_ID] = EnMsgType::LOGIN_MSG_ACK;
+        res[Agreement::ERRNO] = LogInErrCode::FAILURE;
+        res[Agreement::ERRMSG] = "id or password is invalid!";
         conn->Send(res.dump());
     }
 }
@@ -141,20 +141,20 @@ void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timest
  */
 void ChatService::Reg(const TcpConnectionPtr &conn, json &js, Timestamp timestamp) {
     //获取客户端的注册信息创建对象
-    User user(-1, js["name"], js["pwd"]);
+    User user(-1, js[Agreement::NAME], js[Agreement::PASSWORD]);
     if (_userModel.Insert(user)) {
         //插入新用户成功
         json res;
-        res["msgid"] = EnMsgType::REG_MSG_ACK;
-        res["errno"] = 0;
-        res["id"] = user.getId();
+        res[Agreement::MSG_ID] = EnMsgType::REG_MSG_ACK;
+        res[Agreement::ERRNO] = 0;
+        res[Agreement::ID] = user.getId();
         conn->Send(res.dump());
     } else {
         //插入新用户失败
         json res;
-        res["msgid"] = EnMsgType::REG_MSG_ACK;
-        res["errno"] = 1;
-        res["id"] = user.getId();
+        res[Agreement::MSG_ID] = EnMsgType::REG_MSG_ACK;
+        res[Agreement::ERRNO] = 1;
+        res[Agreement::ID] = user.getId();
         conn->Send(res.dump());
     }
 }
@@ -163,7 +163,7 @@ void ChatService::Reg(const TcpConnectionPtr &conn, json &js, Timestamp timestam
  * 私聊
  */
 void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp timestamp) {
-    int toid = js["toid"].get<int>();
+    int toid = js[Agreement::TO_ID].get<int>();
     {
         std::lock_guard<std::mutex> lk(_mtx);
         auto it = _userConnMap.find(toid);
@@ -188,26 +188,27 @@ void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time
  * 添加好友
  */
 void ChatService::addFriend(const TcpConnectionPtr &conn, json &js, Timestamp timestamp) {
-    int userId = js["id"].get<int>();
-    int friendId = js["friendid"].get<int>();
+    int userId = js[Agreement::ID].get<int>();
+    int friendId = js[Agreement::FRIEND_ID].get<int>();
     _friendModel.Insert(userId, friendId);
 }
 
 void ChatService::createGroup(const TcpConnectionPtr &conn, json &js, Timestamp timestamp) {
-    int userId = js["id"].get<int>();
-    Group group(-1, js["groupname"], js["groupdesc"]);
+    int userId = js[Agreement::ID].get<int>();
+    Group group(-1, js[Agreement::GROUP_NAME], js[Agreement::GROUP_DESC]);
     if (_groupModel.createGroup(group)) {
-        _groupModel.addGroup(userId, group.getId(), "creator");
+        _groupModel.addGroup(userId, group.getId(), Agreement::CREATOR);
     }
 }
 
 void ChatService::addGroup(const TcpConnectionPtr &conn, json &js, Timestamp timestamp) {
-    _groupModel.addGroup(js["id"].get<int>(), js["groupid"].get<int>(), "normal");
+    _groupModel.addGroup(js[Agreement::ID].get<int>(), js[Agreement::GROUP_ID].get<int>(), Agreement::NORMAL);
 }
 
 void ChatService::groupChat(const TcpConnectionPtr &conn, json &js, Timestamp timestamp) {
     //获取群里成员的id
-    std::vector<int> idVec = _groupModel.queryGroupUsers(js["id"].get<int>(), js["groupid"].get<int>());
+    std::vector<int> idVec = _groupModel.queryGroupUsers(js[Agreement::ID].get<int>(),
+                                                         js[Agreement::GROUP_ID].get<int>());
     for (int id: idVec) {
         auto it = _userConnMap.find(id);
         if (it != _userConnMap.end()) {
@@ -216,7 +217,7 @@ void ChatService::groupChat(const TcpConnectionPtr &conn, json &js, Timestamp ti
         } else {
             //如果群里的人在不同服务器
             User user = _userModel.Query(id);
-            if (user.getState() == "online") {
+            if (user.getState() == Agreement::ONLINE) {
                 _redis.Publish(id, js.dump());
             } else {
                 //群里不在线离线存储
@@ -260,7 +261,7 @@ void ChatService::clientCloseException(const TcpConnectionPtr &conn) {
     //用户注销，相当于就是下线，在redis中取消订阅通道
     _redis.UnSubscribe(user.getId());
     if (user.getId() != -1) {
-        user.setState("offline");
+        user.setState(Agreement::OFFLINE);
         _userModel.UpdateState(user);
     }
 }
@@ -273,7 +274,7 @@ void ChatService::Reset() {
 }
 
 void ChatService::loginOut(const TcpConnectionPtr &conn, json &js, Timestamp timestamp) {
-    int userId = js["id"].get<int>();
+    int userId = js[Agreement::ID].get<int>();
     {
         std::lock_guard<std::mutex> lk(_mtx);
         auto it = _userConnMap.find(userId);
@@ -284,7 +285,7 @@ void ChatService::loginOut(const TcpConnectionPtr &conn, json &js, Timestamp tim
     //用户注销，相当于就是下线，在redis中取消订阅通道
     _redis.UnSubscribe(userId);
     //更新用户的状态信息
-    User user(userId, "", "", "offline");
+    User user(userId, "", "", Agreement::OFFLINE);
     _userModel.UpdateState(user);
 }
 
