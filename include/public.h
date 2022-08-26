@@ -18,10 +18,10 @@ enum class EnMsgType : int {
     GROUP_CHAT_MSG = 10,   // 群聊天
 };
 
-enum class LogInErrCode : int {
+enum class ErrCode : int {
     SUCCESS = 0,    //正确
     FAILURE = 1,    //失败
-    N0_ONLINE = 2   //不在线
+    ONLINE = 2      //已在线
 };
 
 namespace Agreement {

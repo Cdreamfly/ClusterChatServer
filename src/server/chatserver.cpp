@@ -35,7 +35,6 @@ void ChatServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp 
     std::cout << str << "size:" << str.size() << std::endl;
     //反序列化
     json js = json::parse(str);
-    std::cout << js << std::endl;
     //通过json获取业务处理模块事先绑定的业务处理函数
     auto msgHandler = ChatService::Instance().GetHandler(js[Agreement::MSG_ID].get<EnMsgType>());
     //执行这个业务

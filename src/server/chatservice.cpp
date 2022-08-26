@@ -60,7 +60,7 @@ void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timest
         if (user.getState() == Agreement::ONLINE) {
             json res;
             res[Agreement::MSG_ID] = EnMsgType::LOGIN_MSG_ACK;
-            res[Agreement::ERRNO] = LogInErrCode::N0_ONLINE;
+            res[Agreement::ERRNO] = ErrCode::ONLINE;
             res[Agreement::ERRMSG] = "this account is using, input another!";
             conn->Send(res.dump());
         } else {
@@ -77,7 +77,7 @@ void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timest
             _userModel.UpdateState(user);
             json res;
             res[Agreement::MSG_ID] = EnMsgType::LOGIN_MSG_ACK;
-            res[Agreement::ERRNO] = LogInErrCode::SUCCESS;
+            res[Agreement::ERRNO] = ErrCode::SUCCESS;
             res[Agreement::ID] = user.getId();
             res[Agreement::NAME] = user.getName();
             //查询是否有离线消息
@@ -97,7 +97,7 @@ void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timest
                     js[Agreement::STATE] = it.getState();
                     friendVec.emplace_back(js.dump());
                 }
-                res["friends"] = friendVec;
+                res[Agreement::FRIENDS] = friendVec;
             }
             //查询用户是否有群
             std::vector<Group> groupUsrVec = _groupModel.queryGroup(id);
@@ -130,7 +130,7 @@ void ChatService::Login(const TcpConnectionPtr &conn, json &js, Timestamp timest
         //不正确或找不到的返回
         json res;
         res[Agreement::MSG_ID] = EnMsgType::LOGIN_MSG_ACK;
-        res[Agreement::ERRNO] = LogInErrCode::FAILURE;
+        res[Agreement::ERRNO] = ErrCode::FAILURE;
         res[Agreement::ERRMSG] = "id or password is invalid!";
         conn->Send(res.dump());
     }
@@ -146,14 +146,14 @@ void ChatService::Reg(const TcpConnectionPtr &conn, json &js, Timestamp timestam
         //插入新用户成功
         json res;
         res[Agreement::MSG_ID] = EnMsgType::REG_MSG_ACK;
-        res[Agreement::ERRNO] = 0;
+        res[Agreement::ERRNO] = ErrCode::SUCCESS;
         res[Agreement::ID] = user.getId();
         conn->Send(res.dump());
     } else {
         //插入新用户失败
         json res;
         res[Agreement::MSG_ID] = EnMsgType::REG_MSG_ACK;
-        res[Agreement::ERRNO] = 1;
+        res[Agreement::ERRNO] = ErrCode::FAILURE;
         res[Agreement::ID] = user.getId();
         conn->Send(res.dump());
     }
@@ -169,14 +169,13 @@ void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time
         auto it = _userConnMap.find(toid);
         if (it != _userConnMap.end()) {
             //如果在线就发送消息
-            std::cout << "test send:" << js;
             it->second->Send(js.dump());
             return;
         }
     }
     //跨服务器发送
     User user = _userModel.Query(toid);
-    if (user.getState() == "online") {
+    if (user.getState() == Agreement::ONLINE) {
         _redis.Publish(toid, js.dump());
         return;
     }

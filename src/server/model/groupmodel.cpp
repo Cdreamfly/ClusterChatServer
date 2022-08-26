@@ -27,9 +27,7 @@ void GroupModel::addGroup(const int userId, const int groupId, const std::string
 
 std::vector<Group> GroupModel::queryGroup(const int userId) {
     std::ostringstream sql;
-    sql
-            << "select a.id,a.groupname,a.groupdesc from allgroup a inner join groupuser b on a.id = b.groupid where b.userid = "
-            << userId;
+    sql << "select a.id,a.groupname,a.groupdesc from allgroup a inner join groupuser b on a.id = b.groupid where b.userid = " << userId;
     std::string temp = sql.str();
     MYSQL_RES *res = ConnectionPool::GetConnectionPool().GetConnection()->Query(temp);
     std::vector<Group> groupVec;
@@ -41,11 +39,10 @@ std::vector<Group> GroupModel::queryGroup(const int userId) {
         }
         mysql_free_result(res);
     }
+    //查询群组所有群员的信息
     for (auto &it: groupVec) {
         sql.str("");
-        sql
-                << "select a.id,a.name,a.state,b.grouprole from user a inner join groupuser b on b.userid = a.id where b.groupid = "
-                << it.getId();
+        sql << "select a.id,a.name,a.state,b.grouprole from user a inner join groupuser b on b.userid = a.id where b.groupid = " << it.getId();
         std::string temp = sql.str();
         MYSQL_RES *res = ConnectionPool::GetConnectionPool().GetConnection()->Query(temp);
         if (res != nullptr) {
