@@ -31,6 +31,16 @@ CREATE TABLE `allgroup` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `allgroup`
+--
+
+LOCK TABLES `allgroup` WRITE;
+/*!40000 ALTER TABLE `allgroup` DISABLE KEYS */;
+INSERT INTO `allgroup` VALUES (1,'1','1');
+/*!40000 ALTER TABLE `allgroup` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `friend`
 --
 
@@ -45,6 +55,16 @@ CREATE TABLE `friend` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `friend`
+--
+
+LOCK TABLES `friend` WRITE;
+/*!40000 ALTER TABLE `friend` DISABLE KEYS */;
+INSERT INTO `friend` VALUES (1,2),(2,1),(2,3),(3,1),(4,2),(4,3),(4,4);
+/*!40000 ALTER TABLE `friend` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `groupuser`
 --
 
@@ -54,10 +74,20 @@ DROP TABLE IF EXISTS `groupuser`;
 CREATE TABLE `groupuser` (
   `groupid` int NOT NULL,
   `userid` int NOT NULL,
-  `groupprole` enum('creator','normal') DEFAULT 'normal',
+  `grouprole` enum('creator','normal') DEFAULT 'normal',
   PRIMARY KEY (`groupid`,`userid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `groupuser`
+--
+
+LOCK TABLES `groupuser` WRITE;
+/*!40000 ALTER TABLE `groupuser` DISABLE KEYS */;
+INSERT INTO `groupuser` VALUES (1,1,'creator'),(1,2,'normal'),(1,4,'normal');
+/*!40000 ALTER TABLE `groupuser` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `offlinemessage`
@@ -71,6 +101,15 @@ CREATE TABLE `offlinemessage` (
   `message` varchar(500) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `offlinemessage`
+--
+
+LOCK TABLES `offlinemessage` WRITE;
+/*!40000 ALTER TABLE `offlinemessage` DISABLE KEYS */;
+/*!40000 ALTER TABLE `offlinemessage` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user`
@@ -88,6 +127,16 @@ CREATE TABLE `user` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (1,'cmf','123456','offline'),(2,'ccc','123456','offline'),(3,'3','123456','offline'),(4,'4','123456','online'),(5,'5','123456','offline'),(6,'6','123456','offline'),(7,'7','123456','offline');
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -98,4 +147,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-08-25 12:49:37
+-- Dump completed on 2022-08-28 15:04:59
