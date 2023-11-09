@@ -9,7 +9,3 @@ void jsonTest() {
 	js["age"] = "19";
 	std::cout << js.dump() << std::endl;
 }
-
-int main(){
-	jsonTest();
-}
