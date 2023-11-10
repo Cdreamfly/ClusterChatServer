@@ -1,5 +1,5 @@
 ## V1
-### 创建数据库
+### 数据库
 
 ```sql
 CREATE DATABASE IF NOT EXISTS chat;
