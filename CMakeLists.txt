@@ -6,13 +6,16 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_definitions("-g -Os -Wall -fPIC")
 
+file(GLOB SRC_FILES
+        "${PROJECT_SOURCE_DIR}/src/*.cpp")
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 link_directories(${PROJECT_SOURCE_DIR}/lib/cm/)
 link_directories(${PROJECT_SOURCE_DIR}/lib/mariadb/)
 link_directories(${PROJECT_SOURCE_DIR}/lib/mariadb/plugin/)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-add_executable(${CMAKE_PROJECT_NAME} main.cpp)
+add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC_FILES})
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC cm mariadbcpp)
 
