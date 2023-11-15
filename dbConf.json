@@ -1,0 +1,11 @@
+{
+  "ip": "127.0.0.1",
+  "port": "3306",
+  "user": "root",
+  "pwd": "cmf.199991",
+  "db": "chat",
+  "minSize": 10,
+  "maxSize": 64,
+  "maxIdleTime": 5000,
+  "timeout": 1000
+}

@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_definitions("-g -Os -Wall -fPIC")
 
 file(GLOB SRC_FILES
-        "${PROJECT_SOURCE_DIR}/src/*.cpp")
+        "${PROJECT_SOURCE_DIR}/src/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/db/*.cpp")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 

@@ -40,5 +40,4 @@ namespace Agreement {
 	constexpr const char USERS[] = "users";
 	constexpr const char GROUPS[] = "groups";
 	constexpr const char TO_ID[] = "toId";
-
 }

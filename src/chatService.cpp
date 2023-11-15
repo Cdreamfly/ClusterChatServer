@@ -7,6 +7,12 @@ ChatService::ChatService() {
 	                                                 const cm::Timestamp timestamp) {
 		connection->send(js.dump() + timestamp.toString());
 	}});
+
+	msgHandlerMap_.insert({EnMsgType::REG_MSG, [&](const cm::net::TcpConnectionPtr &connection,
+	                                                 const json &js,
+	                                                 const cm::Timestamp timestamp) {
+
+	}});
 }
 
 ChatService &ChatService::getInstance() {
