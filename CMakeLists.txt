@@ -8,7 +8,8 @@ add_definitions("-g -Os -Wall -fPIC")
 
 file(GLOB SRC_FILES
         "${PROJECT_SOURCE_DIR}/src/*.cpp"
-        "${PROJECT_SOURCE_DIR}/src/db/*.cpp")
+        "${PROJECT_SOURCE_DIR}/src/db/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/model/*.cpp")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -18,6 +19,6 @@ link_directories(${PROJECT_SOURCE_DIR}/lib/mariadb/plugin/)
 
 add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC_FILES})
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC cm mariadbcpp)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC cm mariadbcpp mysqlclient)
 
 find_package(Threads)
