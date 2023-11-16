@@ -4,7 +4,7 @@
 
 class ChatServer {
 public:
-	ChatServer(cm::net::EventLoop *, const cm::net::InetAddress &, const std::string &);
+	ChatServer(cm::net::EventLoop *, const cm::net::InetAddress &, const std::string_view &);
 
 	void start();
 

@@ -9,8 +9,8 @@ ChatService::ChatService() {
 	}});
 
 	msgHandlerMap_.insert({EnMsgType::REG_MSG, [&](const cm::net::TcpConnectionPtr &connection,
-	                                                 const json &js,
-	                                                 const cm::Timestamp timestamp) {
+	                                               const json &js,
+	                                               const cm::Timestamp timestamp) {
 
 	}});
 }
@@ -27,7 +27,9 @@ MsgHandler ChatService::getHandler(const EnMsgType msgId) {
 		return [&](const cm::net::TcpConnectionPtr &connection,
 		           const json &js,
 		           const cm::Timestamp timestamp) {
-			LOG_ERROR("MsgId: %d Can not find handler!", static_cast<int>(msgId));
+			LOG_ERROR("MsgId Can not find handler!", js.at(Agreement::MSG_ID).get<int>());
+			std::string res = "MsgId:" + std::to_string(js.at(Agreement::MSG_ID).get<int>()) + " Can not find!";
+			connection->send(res + " " + timestamp.toString());
 		};
 	}
 }
