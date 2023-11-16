@@ -1,6 +1,9 @@
 ## V1
-### 数据库
 
+### 数据库
+```shell
+sudo apt install libmysqlclient-dev
+```
 ```sql
 CREATE DATABASE IF NOT EXISTS chat;
 ```
