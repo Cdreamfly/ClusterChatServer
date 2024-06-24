@@ -19,6 +19,6 @@ link_directories(${PROJECT_SOURCE_DIR}/lib/mariadb/plugin/)
 
 add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC_FILES})
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC cm mariadbcpp mysqlclient)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC cm mysqlclient)
 
 find_package(Threads)

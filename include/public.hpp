@@ -16,7 +16,8 @@ enum class EnMsgType {
 enum class ErrCode {
 	SUCCESS = 0,    //正确
 	FAILURE = 1,    //失败
-	ONLINE = 2      //已在线
+	ONLINE = 2,     //已在线
+	NOUSER = 3		//未注册
 };
 namespace Agreement {
 	constexpr const char ID[] = "id";

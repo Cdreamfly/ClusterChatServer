@@ -80,7 +80,7 @@ json["id"]			//要注销的id
 {"msgId":1,"id":3,"pwd":"123456"}
 
 // 注册
-{"msgId":4,"id":2,"pwd":"123456"}
+{"msgId":4,"name":"cmf","pwd":"123456"}
 
 // 发消息
 {"msgId":6,"id":1,"from":"cmf","toId":2,"msg":" xxxxxxoooooo!"} 

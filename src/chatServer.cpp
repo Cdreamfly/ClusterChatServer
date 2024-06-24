@@ -3,7 +3,7 @@
 #include "chatService.hpp"
 
 ChatServer::ChatServer(cm::net::EventLoop *loop, const cm::net::InetAddress &addr, const std::string_view &name)
-		: server_(loop, addr, name.data()) {
+		: server_(loop, addr, name.data(), cm::net::TcpServer::Option::kReusePort) {
 	server_.setConnectionCallback([&](const cm::net::TcpConnectionPtr &conn) {
 		if (!conn->connected()) {
 			conn->shutdown();

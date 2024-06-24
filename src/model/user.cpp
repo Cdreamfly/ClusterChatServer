@@ -1,27 +1,28 @@
 #include "model/user.hpp"
 
-User::User(const int id, std::string_view &name, std::string_view &pwd, std::string_view state) : id_(id),
-                                                                                                  name_(name),
-                                                                                                  pwd_(pwd),
-                                                                                                  state_(state) {}
+User::User(const long id, const std::string_view &name, const std::string_view &pwd, const std::string_view state)
+		: id_(id),
+		  name_(name),
+		  pwd_(pwd),
+		  state_(state) {}
 
 void User::setName(const std::string_view &name) {
-
+	name_ = name;
 }
 
-void User::setId(const int id) {
-
+void User::setId(const long id) {
+	id_ = id;
 }
 
 void User::setPwd(const std::string_view &pwd) {
-
+	pwd_ = pwd;
 }
 
 void User::setState(const std::string_view &state) {
-
+	state_ = state;
 }
 
-int User::getId() const {
+long User::getId() const {
 	return id_;
 }
 

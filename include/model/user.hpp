@@ -6,11 +6,11 @@ class User {
 public:
 	User() = default;
 
-	User(int id, std::string_view &, std::string_view &, std::string_view = "offline");
+	User(long, const std::string_view &, const std::string_view &, std::string_view = "offline");
 
 	virtual ~User() = default;
 
-	void setId(int);
+	void setId(long);
 
 	void setName(const std::string_view &);
 
@@ -18,7 +18,7 @@ public:
 
 	void setState(const std::string_view &);
 
-	[[nodiscard]] int getId() const;
+	[[nodiscard]] long getId() const;
 
 	[[nodiscard]] std::string_view getName() const;
 
@@ -27,7 +27,7 @@ public:
 	[[nodiscard]] std::string_view getState() const;
 
 private:
-	int id_{};
+	long id_{};
 	std::string name_{};
 	std::string pwd_{};
 	std::string state_{};
