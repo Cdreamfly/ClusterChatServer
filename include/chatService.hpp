@@ -24,8 +24,6 @@ public:
 private:
 	ChatService();
 
-
-private:
 	std::unordered_map<EnMsgType, MsgHandler> msgHandlerMap_;  //一个消息id对应一个处理函数
 	std::unordered_map<long, cm::net::TcpConnectionPtr> userConnMap_;  //存储在线用户连接信息
 	std::mutex mtx_;

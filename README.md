@@ -11,7 +11,7 @@ CREATE DATABASE IF NOT EXISTS chat;
 mariadb -u root -p chat < chat.sql
 ```
 ### 通信协议
-```json
+```
 // 1.登录
 json["msgId"] = LOGIN_MSG;
 json["id"]			//用户id
@@ -75,7 +75,7 @@ json["msgId"] = LOGINOUT_MSG;
 json["id"]			//要注销的id
 ```
 ### TEST
-```json
+```
 // 登录
 {"msgId":1,"id":3,"pwd":"123456"}
 

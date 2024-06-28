@@ -2,13 +2,13 @@
 
 #include <string>
 
-class User {
+class User final {
 public:
 	User() = default;
 
 	User(long, const std::string_view &, const std::string_view &, std::string_view = "offline");
 
-	virtual ~User() = default;
+	~User() = default;
 
 	void setId(long);
 

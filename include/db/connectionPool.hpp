@@ -5,7 +5,6 @@
 #include <queue>
 #include <mutex>
 #include <atomic>
-#include <thread>
 #include <condition_variable>
 
 #include "db/connection.hpp"

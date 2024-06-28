@@ -33,7 +33,7 @@ namespace cm {
         using ptr = std::shared_ptr<LogEvent>;
 
         template<typename ...Args>
-        LogEvent(LogLevel level,
+        LogEvent(const LogLevel level,
                  std::string fileName,
                  std::string funcName,
                  const uint32_t line,
@@ -208,7 +208,7 @@ namespace cm {
 }
 #define LOG_BASE(level, fmt, ...) \
 cm::Logger::GetInstance().StdoutLog()->Log(std::make_shared<cm::LogEvent>(level,__FILE__,__FUNCTION__,__LINE__,fmt,##__VA_ARGS__));
-//cm::Logger::GetInstance().FileLog("../file.log")->Log(std::make_shared<cm::LogEvent>(level,__FILE__,__FUNCTION__,__LINE__,fmt,##__VA_ARGS__)) \
+/*cm::Logger::GetInstance().FileLog("../file.log")->Log(std::make_shared<cm::LogEvent>(level,__FILE__,__FUNCTION__,__LINE__,fmt,##__VA_ARGS__)) */
 
 #define LOG_DEBUG(fmt, ...) LOG_BASE(cm::LogLevel::DEBUG,fmt,##__VA_ARGS__)
 #define LOG_INFO(fmt, ...)  LOG_BASE(cm::LogLevel::INFO,fmt,##__VA_ARGS__)

@@ -10,10 +10,12 @@ ConnectionPool &ConnectionPool::getConnectionPool() {
 
 std::shared_ptr<Connection> ConnectionPool::getConnection() {
 	std::unique_lock<std::mutex> lock{mtx_};
-	while (connectionQueue_.empty()) {  //连接为空，就阻塞等待connectionTimeout_时间，如果时间过了，还没唤醒
+	while (connectionQueue_.empty()) {
+		//连接为空，就阻塞等待connectionTimeout_时间，如果时间过了，还没唤醒
 		if (std::cv_status::timeout == cv_.wait_for(lock, std::chrono::microseconds(dbConf_.getTimeout()))) {
-			if (connectionQueue_.empty()) { //就可能还是为空
-				continue;
+			if (connectionQueue_.empty()) {
+				//就可能还是为空
+				return nullptr;
 			}
 		}
 	}
@@ -39,7 +41,7 @@ ConnectionPool::ConnectionPool() {
 	}
 	//启动一个新的线程，作为连接的生产者
 	std::thread produce([this] { produceConnectionTask(); });
-	produce.detach();//守护线程，主线程结束了，这个线程就结束了
+	produce.detach(); //守护线程，主线程结束了，这个线程就结束了
 	//启动一个新的定时线程，扫描超过maxIdleTime时间的空闲连接，进行对于的连接回收
 	std::thread scanner([this] { scannerConnectionTask(); });
 	scanner.detach();
@@ -47,7 +49,7 @@ ConnectionPool::ConnectionPool() {
 
 ConnectionPool::~ConnectionPool() {
 	while (!connectionQueue_.empty()) {
-		Connection *ptr = connectionQueue_.front();
+		const Connection *ptr = connectionQueue_.front();
 		connectionQueue_.pop();
 		delete ptr;
 	}
@@ -62,8 +64,7 @@ bool ConnectionPool::loadConfigFile() {
 	json js;
 	try {
 		js = json::parse(ifs);
-	}
-	catch (const json::exception &e) {
+	} catch (const json::exception &e) {
 		LOG_ERROR("JSON Config Error %s", e.what());
 		return false;
 	}
@@ -89,8 +90,8 @@ bool ConnectionPool::loadConfigFile() {
 		std::this_thread::sleep_for(std::chrono::seconds(dbConf_.getMaxIdleTime()));
 		std::unique_lock<std::mutex> lock(mtx_);
 		while (connectionCount_ > dbConf_.getMinSize()) {
-			Connection *ptr = connectionQueue_.front();//队头的时间没超过，那后面的时间就都没超过
-			if (ptr->getAliveTime() >= dbConf_.getMaxIdleTime() * 1000) {
+			if (const Connection *ptr = connectionQueue_.front(); //队头的时间没超过，那后面的时间就都没超过
+				ptr->getAliveTime() >= dbConf_.getMaxIdleTime() * 1000) {
 				connectionQueue_.pop();
 				--connectionCount_;
 				delete ptr;
@@ -102,8 +103,8 @@ bool ConnectionPool::loadConfigFile() {
 }
 
 void ConnectionPool::addConnection() {
-	auto *conn = new Connection();
-	if (conn->connect(dbConf_.getIp(), dbConf_.getPort(), dbConf_.getUser(), dbConf_.getPwd(), dbConf_.getDb())) {
+	if (auto *conn = new Connection();
+		conn->connect(dbConf_.getIp(), dbConf_.getPort(), dbConf_.getUser(), dbConf_.getPwd(), dbConf_.getDb())) {
 		conn->refreshAliveTime();
 		connectionQueue_.push(conn);
 		++connectionCount_;

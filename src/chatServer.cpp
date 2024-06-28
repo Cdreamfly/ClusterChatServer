@@ -14,7 +14,7 @@ ChatServer::ChatServer(cm::net::EventLoop *loop, const cm::net::InetAddress &add
 	                               cm::net::Buffer *buf,
 	                               const cm::Timestamp &time) {
 		json js;
-		EnMsgType type;
+		auto type = EnMsgType::UNKNOWN_MSG;
 		try {
 			js = json::parse(buf->retrieveAllAsString());
 		}

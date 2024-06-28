@@ -1,6 +1,7 @@
 #pragma once
 
 enum class EnMsgType {
+	UNKNOWN_MSG = 0,      // 未知消息
 	LOGIN_MSG = 1,        // 登录消息
 	LOGIN_MSG_ACK = 2,    // 登录响应消息
 	LOGIN_OUT_MSG = 3,    // 注销消息
